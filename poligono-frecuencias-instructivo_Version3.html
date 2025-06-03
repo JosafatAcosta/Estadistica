@@ -1,0 +1,336 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Instructivo: Polígono de Frecuencias desde una Tabla</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f8f9fa;
+      color: #222;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+    header {
+      background: #18bc9c;
+      color: #fff;
+      padding: 1em 0;
+      text-align: center;
+    }
+    main {
+      max-width: 800px;
+      margin: 2em auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.07);
+      padding: 2em;
+    }
+    h2 {
+      color: #18bc9c;
+      margin-top: 2em;
+    }
+    .step {
+      margin-bottom: 2.5em;
+    }
+    .example-table, .example-table th, .example-table td {
+      border: 1px solid #aaa;
+      border-collapse: collapse;
+      padding: 0.5em;
+      text-align: center;
+    }
+    .example-table {
+      margin: 1em 0;
+      width: 100%;
+    }
+    .controls {
+      text-align: center;
+      margin-bottom: 1em;
+    }
+    button {
+      background: #18bc9c;
+      color: #fff;
+      border: none;
+      padding: 0.5em 1.5em;
+      border-radius: 4px;
+      margin: 0 0.5em;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button[disabled] {
+      background: #adb5bd;
+      cursor: not-allowed;
+    }
+    canvas {
+      background: #f4f6fa;
+      display: block;
+      margin: 1em auto;
+      border: 1px solid #d1d1d1;
+      border-radius: 5px;
+    }
+    .footer {
+      text-align: center;
+      color: #aaa;
+      margin-top: 2em;
+      font-size: 0.9em;
+    }
+    @media (max-width: 600px) {
+      main {
+        padding: 1em;
+      }
+      .example-table {
+        font-size: 0.95em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Cómo Generar un Polígono de Frecuencias desde una Tabla</h1>
+    <p>Instructivo paso a paso con gráficas ilustrativas | Elaborado por Pisc. Josafat Acosta</p>
+  </header>
+  <main>
+    <div id="instrucciones"></div>
+    <div class="controls">
+      <button id="prevBtn">Anterior</button>
+      <button id="nextBtn">Siguiente</button>
+    </div>
+    <canvas id="polyCanvas" width="700" height="340"></canvas>
+  </main>
+  <div class="footer">
+    &copy; 2025 Estadística Descriptiva Aplicada | Lic. Josafat Acosta García
+  </div>
+  <script>
+    // Datos de ejemplo: tabla de frecuencias agrupada
+    const frecuencias = [
+      { intervalo: "10-14", fi: 2 },
+      { intervalo: "15-19", fi: 4 },
+      { intervalo: "20-24", fi: 8 },
+      { intervalo: "25-29", fi: 5 },
+      { intervalo: "30-34", fi: 3 }
+    ];
+
+    // Calcula las marcas de clase de cada intervalo
+    function getMarcasClase(frecuencias) {
+      return frecuencias.map(row => {
+        const [a, b] = row.intervalo.split('-').map(Number);
+        return (a + b) / 2;
+      });
+    }
+
+    // Instrucciones y pasos
+    const pasos = [
+      {
+        titulo: "1. Observa la Tabla de Frecuencias",
+        descripcion: `Supón que tienes la siguiente tabla de frecuencias para un conjunto de datos agrupados:`,
+        tabla: true,
+        dibujar: function(ctx) {
+          ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+        }
+      },
+      {
+        titulo: "2. Calcula la Marca de Clase de cada Intervalo",
+        descripcion: `Para cada intervalo, calcula la <b>marca de clase</b> sumando los límites inferior y superior y dividiendo entre 2. Así, obtienes:`,
+        tabla: "marcas",
+        dibujar: function(ctx) {
+          ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+        }
+      },
+      {
+        titulo: "3. Dibuja los Ejes del Polígono",
+        descripcion: `Dibuja el eje X con las marcas de clase y el eje Y con la escala de frecuencias.`,
+        tabla: false,
+        dibujar: function(ctx) {
+          clearCanvas(ctx);
+          drawAxesPoly(ctx, frecuencias, true, false, false);
+        }
+      },
+      {
+        titulo: "4. Marca las Marcas de Clase en el Eje X",
+        descripcion: `Coloca las marcas de clase calculadas en el eje X.`,
+        tabla: false,
+        dibujar: function(ctx) {
+          clearCanvas(ctx);
+          drawAxesPoly(ctx, frecuencias, true, true, false);
+        }
+      },
+      {
+        titulo: "5. Coloca los Puntos sobre las Marcas de Clase según la Frecuencia",
+        descripcion: `Dibuja un punto sobre cada marca de clase, a la altura de la frecuencia correspondiente.`,
+        tabla: false,
+        dibujar: function(ctx) {
+          clearCanvas(ctx);
+          drawAxesPoly(ctx, frecuencias, true, true, true, false);
+        }
+      },
+      {
+        titulo: "6. Une los Puntos para Formar el Polígono",
+        descripcion: `Conecta los puntos trazados con líneas rectas para formar el polígono de frecuencias. Opcionalmente, une los extremos a la frecuencia 0.`,
+        tabla: false,
+        dibujar: function(ctx) {
+          clearCanvas(ctx);
+          drawAxesPoly(ctx, frecuencias, true, true, true, true);
+        }
+      }
+    ];
+
+    // Renderiza instrucciones y tabla si aplica
+    function renderStep(idx) {
+      const paso = pasos[idx];
+      const cont = document.getElementById('instrucciones');
+      let tablaHTML = "";
+      if (paso.tabla === true) tablaHTML = renderTablaFrecuencias();
+      if (paso.tabla === "marcas") tablaHTML = renderTablaMarcas();
+      cont.innerHTML = `
+        <div class="step">
+          <h2>${paso.titulo}</h2>
+          <p>${paso.descripcion}</p>
+          ${tablaHTML}
+        </div>
+      `;
+    }
+
+    function renderTablaFrecuencias() {
+      let html = `<table class="example-table"><tr><th>Intervalo</th><th>Frecuencia (fi)</th></tr>`;
+      for(const row of frecuencias) {
+        html += `<tr><td>${row.intervalo}</td><td>${row.fi}</td></tr>`;
+      }
+      html += "</table>";
+      return html;
+    }
+
+    function renderTablaMarcas() {
+      const marcas = getMarcasClase(frecuencias);
+      let html = `<table class="example-table"><tr><th>Intervalo</th><th>Marca de Clase</th><th>Frecuencia (fi)</th></tr>`;
+      for(let i=0; i<frecuencias.length; i++) {
+        html += `<tr><td>${frecuencias[i].intervalo}</td><td>${marcas[i]}</td><td>${frecuencias[i].fi}</td></tr>`;
+      }
+      html += "</table>";
+      return html;
+    }
+
+    // Dibuja los ejes, marcas de clase y el polígono
+    function drawAxesPoly(ctx, data, showAxes, showMarcas, showPuntos, showLine) {
+      const w = ctx.canvas.width, h = ctx.canvas.height;
+      const margin = 65, axisBottom = h - margin, axisLeft = margin;
+      const axisRight = w - margin, axisTop = margin;
+      const marcas = getMarcasClase(data);
+      const xs = [];
+      // Escala X: repartir marcas equidistantes
+      for(let i=0; i<marcas.length; i++) {
+        xs.push(axisLeft + i*((axisRight-axisLeft)/(marcas.length-1)));
+      }
+      // Escala Y
+      const maxFi = Math.max(...data.map(d => d.fi));
+      function getY(fi) {
+        return axisBottom - (fi * (axisBottom-axisTop) / maxFi);
+      }
+      // Ejes
+      if(showAxes) {
+        ctx.strokeStyle = '#222';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(axisLeft, axisBottom);
+        ctx.lineTo(axisRight, axisBottom);
+        ctx.moveTo(axisLeft, axisBottom);
+        ctx.lineTo(axisLeft, axisTop-10);
+        ctx.stroke();
+        // Etiquetas de fi
+        ctx.font = "15px Segoe UI";
+        ctx.fillStyle = "#222";
+        for(let i=0; i<=maxFi; i+=2) {
+          const y = getY(i);
+          ctx.fillText(i, axisLeft-30, y+5);
+          ctx.strokeStyle="#bbb";
+          ctx.lineWidth=1;
+          ctx.beginPath();
+          ctx.moveTo(axisLeft-5, y);
+          ctx.lineTo(axisRight, y);
+          ctx.stroke();
+        }
+        ctx.lineWidth = 2;
+      }
+      // Marcas de clase
+      if(showMarcas) {
+        ctx.font = "15px Segoe UI";
+        ctx.fillStyle = "#18bc9c";
+        for(let i=0; i<marcas.length; i++) {
+          ctx.fillText(marcas[i], xs[i]-16, axisBottom+25);
+        }
+      }
+      // Puntos sobre las marcas de clase
+      if(showPuntos) {
+        for(let i=0; i<marcas.length; i++) {
+          const x = xs[i];
+          const y = getY(data[i].fi);
+          ctx.beginPath();
+          ctx.arc(x, y, 6, 0, 2*Math.PI);
+          ctx.fillStyle = "#18bc9c";
+          ctx.fill();
+          ctx.strokeStyle = "#127a63";
+          ctx.lineWidth = 2;
+          ctx.stroke();
+          // Etiqueta frecuencia
+          ctx.font = "bold 15px Segoe UI";
+          ctx.fillStyle = "#222";
+          ctx.fillText(data[i].fi, x-7, y-15);
+        }
+      }
+      // Polígono de frecuencias
+      if(showLine) {
+        ctx.strokeStyle = "#18bc9c";
+        ctx.lineWidth = 3;
+        ctx.beginPath();
+        // Punto inicial a frecuencia 0 (opcional, para cerrar el polígono)
+        ctx.moveTo(xs[0], axisBottom);
+        for(let i=0; i<marcas.length; i++) {
+          ctx.lineTo(xs[i], getY(data[i].fi));
+        }
+        // Punto final a frecuencia 0
+        ctx.lineTo(xs[xs.length-1], axisBottom);
+        ctx.stroke();
+        ctx.globalAlpha = 0.15;
+        ctx.fillStyle = "#18bc9c";
+        ctx.beginPath();
+        ctx.moveTo(xs[0], axisBottom);
+        for(let i=0; i<marcas.length; i++) {
+          ctx.lineTo(xs[i], getY(data[i].fi));
+        }
+        ctx.lineTo(xs[xs.length-1], axisBottom);
+        ctx.closePath();
+        ctx.fill();
+        ctx.globalAlpha = 1;
+      }
+      // Títulos de ejes
+      ctx.save();
+      ctx.font = "16px Segoe UI";
+      ctx.fillStyle = "#222";
+      ctx.fillText("Frecuencia (fi)", axisLeft-60, axisTop-15);
+      ctx.fillText("Marca de clase", (axisLeft+axisRight)/2-40, axisBottom+50);
+      ctx.restore();
+    }
+
+    function clearCanvas(ctx) {
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    }
+
+    // Control de pasos
+    let pasoActual = 0;
+    function showPaso(idx) {
+      pasoActual = idx;
+      renderStep(idx);
+      const ctx = document.getElementById('polyCanvas').getContext('2d');
+      pasos[pasoActual].dibujar(ctx);
+      document.getElementById('prevBtn').disabled = idx === 0;
+      document.getElementById('nextBtn').disabled = idx === pasos.length - 1;
+    }
+    document.getElementById('prevBtn').onclick = () => showPaso(Math.max(0, pasoActual-1));
+    document.getElementById('nextBtn').onclick = () => showPaso(Math.min(pasos.length-1, pasoActual+1));
+
+    // Inicializar
+    showPaso(0);
+  </script>
+</body>
+</html>

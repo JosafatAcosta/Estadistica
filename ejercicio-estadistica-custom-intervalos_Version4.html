@@ -1,0 +1,630 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Tablas de frecuencias y gráficas</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    :root {
+      --primary: #5f27cd;
+      --accent: #00d2d3;
+      --success: #10ac84;
+      --muted: #8395a7;
+      --box-bg: #fff;
+      --main-bg: #f5f7fa;
+      --shadow: 0 2px 14px rgba(95,39,205,0.07);
+    }
+    body {
+      background: var(--main-bg);
+      font-family: 'Segoe UI', Arial, sans-serif;
+      color: #222;
+      margin: 0;
+      padding: 0;
+    }
+    header {
+      background: var(--primary);
+      color: #fff;
+      padding: 1.35em 0 1.15em 0;
+      text-align: center;
+      box-shadow: 0 2px 8px rgba(95,39,205,.06);
+    }
+    main {
+      max-width: 950px;
+      margin: 2em auto 1em auto;
+      background: var(--box-bg);
+      border-radius: 16px;
+      box-shadow: var(--shadow);
+      padding: 2em 2.5em;
+    }
+    h2 {
+      color: var(--primary);
+      margin-top: 1.3em;
+      font-size: 1.2em;
+    }
+    .data-box {
+      background: #f1f7fa;
+      border-left: 4px solid var(--accent);
+      padding: 1em 1.4em;
+      margin: 1em 0 2em 0;
+      border-radius: 8px;
+      font-size: 1.08em;
+      line-height: 1.8;
+      word-break: break-all;
+    }
+    .controls {
+      text-align: center;
+      margin-top: 1.4em;
+      margin-bottom: 1.2em;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.6em 1.5em;
+      justify-content: center;
+      align-items: flex-end;
+    }
+    label {
+      font-weight: 500;
+      margin-right: 0.3em;
+      margin-bottom: 0.25em;
+      display: inline-block;
+    }
+    input[type="number"], input[type="text"], textarea {
+      width: 60px;
+      font-size: 1em;
+      border-radius: 6px;
+      border: 1.2px solid var(--muted);
+      padding: 0.3em 0.6em;
+      margin: 0 0.4em;
+      background: var(--main-bg);
+      resize: none;
+    }
+    textarea {
+      width: 320px;
+      min-width: 160px;
+      min-height: 40px;
+      max-width: 90vw;
+      max-height: 120px;
+      line-height: 1.4em;
+      vertical-align: middle;
+    }
+    select {
+      font-size: 1em;
+      border-radius: 6px;
+      border: 1.2px solid var(--muted);
+      padding: 0.3em 0.5em;
+      background: var(--main-bg);
+      margin-left: 0.1em;
+    }
+    button {
+      background: var(--primary);
+      color: #fff;
+      border: none;
+      padding: 0.52em 1.5em;
+      border-radius: 20px;
+      font-size: 1.06em;
+      font-weight: 500;
+      cursor: pointer;
+      transition: background 0.18s;
+      margin: 0 0.5em;
+      box-shadow: 0 1px 8px rgba(95,39,205,0.05);
+    }
+    button.secondary {
+      background: var(--accent);
+    }
+    button:active {
+      background: var(--accent);
+    }
+    .example-table, .example-table th, .example-table td {
+      border: 1px solid #aaa;
+      border-collapse: collapse;
+      padding: 0.45em;
+      text-align: center;
+    }
+    .example-table {
+      margin: 1em 0;
+      width: 100%;
+      font-size: 1em;
+    }
+    canvas {
+      background: #f4f6fa;
+      display: block;
+      margin: 2em auto 1em auto;
+      border: 1px solid #d1d1d1;
+      border-radius: 5px;
+    }
+    .footer {
+      text-align: center;
+      color: var(--muted);
+      margin-top: 2em;
+      font-size: 0.98em;
+    }
+    .tab-btns {
+      display: flex;
+      justify-content: center;
+      gap: 0.7em;
+      margin-bottom: 1.3em;
+      flex-wrap: wrap;
+    }
+    .tab-btn {
+      background: var(--muted);
+      color: #fff;
+      border: none;
+      border-radius: 15px;
+      font-size: 1em;
+      padding: 0.4em 1.2em;
+      margin: 0 0.1em;
+      cursor: pointer;
+      transition: background 0.18s;
+      box-shadow: 0 1px 6px rgba(95,39,205,0.04);
+    }
+    .tab-btn.active {
+      background: var(--primary);
+      color: #fff;
+      font-weight: 600;
+    }
+    .alert {
+      background: #fff0f0;
+      color: #b14040;
+      border-left: 4px solid #ee5253;
+      border-radius: 7px;
+      margin: 0.8em 0 1em 0;
+      padding: 0.8em 1.2em;
+      font-weight: 500;
+      font-size: 1em;
+    }
+    .user-data-box {
+      background: #f9f8ff;
+      border-radius: 10px;
+      border-left: 4px solid var(--primary);
+      margin-bottom: 1.2em;
+      padding: 0.7em 1em;
+      font-size: 1em;
+      display: flex;
+      align-items: center;
+      gap: 1.8em;
+      flex-wrap: wrap;
+      justify-content: space-between;
+    }
+    .user-data-controls {
+      margin-top: 0.7em;
+      display: flex;
+      flex-wrap: wrap;
+      gap: 0.5em 1.5em;
+      align-items: center;
+    }
+    .user-data-controls label {
+      margin-bottom: 0;
+      font-weight: 400;
+    }
+    .user-data-controls button {
+      padding: 0.32em 1.2em;
+      font-size: 0.96em;
+    }
+    @media (max-width: 700px) {
+      main { padding: 1em 0.5em; }
+      .example-table { font-size: 0.95em; }
+      .controls { flex-direction: column; align-items: stretch; gap: 0.75em; }
+      .user-data-box { flex-direction: column; gap: 0.4em; }
+    }
+    @media (max-width: 480px) {
+      .example-table { font-size: 0.93em; }
+      main { padding: 0.4em 0.1em; border-radius: 0; }
+      .tab-btns { flex-direction: column; gap: 0.2em; }
+      .data-box { font-size: 0.98em; }
+      .user-data-box { padding: 0.7em 0.6em; }
+      textarea { width: 98vw; max-width: 98vw; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Tablas de frecuencias y gráficas</h1>
+    <p>Elige número de intervalos y amplitud (exacta o sugerida)</p>
+  </header>
+  <main>
+    <h2>Datos</h2>
+    <div class="user-data-box">
+      <div>
+        <b>Ingresar tus propios datos (separados por coma):</b>
+        <div class="user-data-controls">
+          <textarea id="userDataInput" placeholder="Ejemplo: 13, 17, 19, 22, 28, ..."></textarea>
+          <button onclick="usarDatosUsuario()">Usar estos datos</button>
+          <span id="userDataMsg" style="color:var(--success);font-weight:500;"></span>
+        </div>
+      </div>
+      <div style="font-size:0.96em;">
+        <b>O utilizar datos aleatorios</b><br>
+        (puedes modificar el número de datos abajo)
+      </div>
+    </div>
+    <div class="data-box" id="datosBox"></div>
+    <div class="controls">
+      <button onclick="generarDatos()" class="secondary" title="Nuevos datos aleatorios">🎲 Nuevos datos</button>
+      <label>Número de datos: <input type="number" id="numDatos" value="30" min="10" max="80"></label>
+      <label>
+        Número de intervalos:
+        <select id="numClases" onchange="actualizarAmplitud()">
+          <option value="4">4</option>
+          <option value="5">5</option>
+          <option value="6" selected>6</option>
+          <option value="7">7</option>
+          <option value="8">8</option>
+          <option value="9">9</option>
+        </select>
+      </label>
+      <label>
+        Amplitud de intervalo:
+        <input type="number" id="amplitud" min="1" step="1" value="0">
+      </label>
+      <label>
+        <input type="checkbox" id="amplitudExacta" onchange="actualizarAmplitud()"> Amplitud exacta
+      </label>
+      <button onclick="generarIntervalos()" title="Actualizar tabla con intervalos">Aplicar</button>
+    </div>
+    <div id="alerta" class="alert" style="display:none;"></div>
+    <div class="tab-btns">
+      <button class="tab-btn active" id="tab-tbl" onclick="setTab('tbl')">Tabla de frecuencias</button>
+      <button class="tab-btn" id="tab-hist" onclick="setTab('hist')">Histograma</button>
+      <button class="tab-btn" id="tab-poly" onclick="setTab('poly')">Polígono de frecuencias</button>
+      <button class="tab-btn" id="tab-both" onclick="setTab('both')">Histograma + Polígono</button>
+    </div>
+    <div id="tab-content"></div>
+    <canvas id="canvas" width="700" height="340" style="display:none;"></canvas>
+  </main>
+  <div class="footer">
+    &copy; 2025 Estadística Descriptiva Aplicada | Psic. Josafat Acosta García
+  </div>
+  <script>
+    // Utilidad para generar datos aleatorios
+    function generarDatosAleatorios(n, min=10, max=70) {
+      let arr = [];
+      for (let i = 0; i < n; i++) {
+        arr.push(Math.round(Math.random()*(max-min) + min));
+      }
+      arr.sort((a,b)=>a-b);
+      return arr;
+    }
+
+    let datos = [];
+    let clases = [];
+    let tab = "tbl";
+    let amplitudGlobal = 0;
+
+    function actualizarAmplitud() {
+      // Sugerir amplitud o forzarla exacta
+      const nclases = parseInt(document.getElementById('numClases').value);
+      if (!datos.length) return;
+      let min = Math.min(...datos);
+      let max = Math.max(...datos);
+      let rango = max - min + 1;
+      let sugerida = Math.ceil(rango / nclases);
+      let amplitudInput = document.getElementById('amplitud');
+      let exacta = document.getElementById('amplitudExacta').checked;
+      if (exacta) {
+        // Solo mostrar divisores exactos del rango
+        let opciones = [];
+        for (let i = 1; i <= rango; i++) {
+          if (rango % i === 0 && rango / i >= 4 && rango / i <= 9) opciones.push(i);
+        }
+        if (opciones.length) {
+          amplitudInput.value = opciones[0];
+          amplitudInput.min = opciones[0];
+          amplitudInput.max = opciones[opciones.length-1];
+        } else {
+          amplitudInput.value = sugerida;
+        }
+        amplitudInput.disabled = false;
+      } else {
+        amplitudInput.value = sugerida;
+        amplitudInput.min = 1;
+        amplitudInput.max = rango;
+        amplitudInput.disabled = false;
+      }
+    }
+
+    function agruparDatos(datos, k, amplitud, exacta) {
+      let n = datos.length;
+      let min = Math.min(...datos);
+      let max = Math.max(...datos);
+      let rango = max - min + 1;
+      let clases = [];
+      let inicio = min;
+      if (exacta && ((rango % amplitud) !== 0)) {
+        document.getElementById('alerta').style.display = '';
+        document.getElementById('alerta').textContent = `No se puede dividir el rango exacto (${rango}) en amplitudes de ${amplitud}.`;
+        return [];
+      }
+      let k2 = exacta ? rango / amplitud : k;
+      let fin = inicio + amplitud;
+      for(let i=0; i<k2; i++) {
+        if (i === k2-1) fin = max+1;
+        let clase = {
+          li: inicio,
+          ls: fin,
+          marca: ((inicio+fin-1)/2).toFixed(2),
+          fi: 0
+        };
+        clases.push(clase);
+        inicio = fin;
+        fin = inicio + amplitud;
+      }
+      // Contar frecuencias
+      datos.forEach(x=>{
+        for(let i=0; i<clases.length; i++) {
+          if (x >= clases[i].li && x < clases[i].ls) {
+            clases[i].fi++;
+            break;
+          }
+        }
+      });
+      return clases;
+    }
+
+    // RENDER TABLA
+    function renderTabla(clases) {
+      if (!clases.length) return "<div class='alert'>No es posible construir la tabla con los parámetros indicados.</div>";
+      let html = `<table class="example-table"><tr>
+        <th>Clase</th>
+        <th>Marca de clase (x<sub>i</sub>)</th>
+        <th>Frecuencia (f<sub>i</sub>)</th>
+        <th>Frecuencia acumulada (F<sub>i</sub>)</th>
+      </tr>`;
+      let Fa = 0;
+      for(let i=0; i<clases.length; i++) {
+        Fa += clases[i].fi;
+        html += `<tr>
+          <td>[${clases[i].li}, ${clases[i].ls})</td>
+          <td>${clases[i].marca}</td>
+          <td>${clases[i].fi}</td>
+          <td>${Fa}</td>
+        </tr>`;
+      }
+      html += "</table>";
+      return html;
+    }
+
+    // DIBUJAR HISTOGRAMA
+    function drawHistograma(ctx, clases, overlayPoly = false) {
+      ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+      const w = ctx.canvas.width, h = ctx.canvas.height;
+      const margin = 60, axisBottom = h - margin, axisLeft = margin;
+      const axisRight = w - margin, axisTop = margin;
+      const n = clases.length;
+      const maxFi = Math.max(...clases.map(c=>c.fi));
+      // Ejes
+      ctx.strokeStyle = '#222';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(axisLeft, axisBottom);
+      ctx.lineTo(axisRight, axisBottom);
+      ctx.moveTo(axisLeft, axisBottom);
+      ctx.lineTo(axisLeft, axisTop-10);
+      ctx.stroke();
+      // Etiquetas Y
+      ctx.font = "15px Segoe UI";
+      ctx.fillStyle = "#222";
+      for(let i=0; i<=maxFi; i+=Math.ceil(maxFi/6)||1) {
+        const y = axisBottom - (i * (axisBottom-axisTop) / maxFi);
+        ctx.fillText(i, axisLeft-30, y+6);
+        ctx.strokeStyle="#e3eafc";
+        ctx.lineWidth=1;
+        ctx.beginPath();
+        ctx.moveTo(axisLeft-5, y);
+        ctx.lineTo(axisRight, y);
+        ctx.stroke();
+      }
+      ctx.lineWidth=2;
+      // Barras
+      const barWidth = ((axisRight-axisLeft)/n) * 0.92;
+      for(let i=0; i<n; i++) {
+        const x = axisLeft + i*((axisRight-axisLeft)/n) + (((axisRight-axisLeft)/n)-barWidth)/2;
+        const y = axisBottom - (clases[i].fi * (axisBottom-axisTop) / maxFi);
+        ctx.fillStyle="#5f27cd";
+        ctx.globalAlpha = overlayPoly ? 0.6 : 1;
+        ctx.fillRect(x, y, barWidth, axisBottom-y);
+        ctx.globalAlpha = 1;
+        ctx.font = "bold 13px Segoe UI";
+        ctx.fillStyle = "#fff";
+        ctx.fillText(clases[i].fi, x+barWidth/2-7, y+18);
+      }
+      // etiquetas clases
+      ctx.font = "13px Segoe UI";
+      ctx.fillStyle = "#222";
+      for(let i=0; i<n; i++) {
+        const x = axisLeft + i*((axisRight-axisLeft)/n) + barWidth/2-27;
+        ctx.fillText(`[${clases[i].li},${clases[i].ls})`, x, axisBottom+25);
+      }
+      // títulos ejes
+      ctx.save();
+      ctx.font = "15px Segoe UI";
+      ctx.fillStyle = "#222";
+      ctx.fillText("Frecuencia (fi)", axisLeft-47, axisTop-15);
+      ctx.fillText("Clases", (axisLeft+axisRight)/2-36, axisBottom+47);
+      ctx.restore();
+
+      // Si overlayPoly, dibujar polígono encima
+      if (overlayPoly) {
+        drawPoligono(ctx, clases, true);
+      }
+    }
+
+    // DIBUJAR POLÍGONO
+    function drawPoligono(ctx, clases, overlay=false) {
+      // Si no overlay, limpia el canvas
+      if (!overlay) ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+      const w = ctx.canvas.width, h = ctx.canvas.height;
+      const margin = 60, axisBottom = h - margin, axisLeft = margin;
+      const axisRight = w - margin, axisTop = margin;
+      const n = clases.length;
+      const maxFi = Math.max(...clases.map(c=>c.fi));
+      // Ejes solo si no es overlay
+      if (!overlay) {
+        ctx.strokeStyle = '#222';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(axisLeft, axisBottom);
+        ctx.lineTo(axisRight, axisBottom);
+        ctx.moveTo(axisLeft, axisBottom);
+        ctx.lineTo(axisLeft, axisTop-10);
+        ctx.stroke();
+        // Etiquetas Y
+        ctx.font = "15px Segoe UI";
+        ctx.fillStyle = "#222";
+        for(let i=0; i<=maxFi; i+=Math.ceil(maxFi/6)||1) {
+          const y = axisBottom - (i * (axisBottom-axisTop) / maxFi);
+          ctx.fillText(i, axisLeft-30, y+6);
+          ctx.strokeStyle="#e3eafc";
+          ctx.lineWidth=1;
+          ctx.beginPath();
+          ctx.moveTo(axisLeft-5, y);
+          ctx.lineTo(axisRight, y);
+          ctx.stroke();
+        }
+        ctx.lineWidth=2;
+      }
+      // Polígono
+      const xs = [];
+      for(let i=0; i<n; i++) {
+        xs.push(axisLeft + i*((axisRight-axisLeft)/(n-1)));
+      }
+      const getY = fi => axisBottom - (fi * (axisBottom-axisTop) / maxFi);
+      ctx.strokeStyle="#00d2d3";
+      ctx.lineWidth=3;
+      ctx.beginPath();
+      ctx.moveTo(xs[0], axisBottom);
+      for(let i=0; i<n; i++) {
+        ctx.lineTo(xs[i], getY(clases[i].fi));
+      }
+      ctx.lineTo(xs[n-1], axisBottom);
+      ctx.stroke();
+      ctx.globalAlpha=0.18;
+      ctx.fillStyle="#00d2d3";
+      ctx.beginPath();
+      ctx.moveTo(xs[0], axisBottom);
+      for(let i=0; i<n; i++) {
+        ctx.lineTo(xs[i], getY(clases[i].fi));
+      }
+      ctx.lineTo(xs[n-1], axisBottom);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha=1;
+      // Puntos
+      for(let i=0; i<n; i++) {
+        ctx.beginPath();
+        ctx.arc(xs[i], getY(clases[i].fi), 6, 0, 2*Math.PI);
+        ctx.fillStyle="#00d2d3";
+        ctx.fill();
+        ctx.strokeStyle = "#0f868a";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.font = "bold 13px Segoe UI";
+        ctx.fillStyle = "#222";
+        ctx.fillText(clases[i].fi, xs[i]-7, getY(clases[i].fi)-13);
+      }
+      // etiquetas marcas de clase
+      if (!overlay) {
+        ctx.font = "13px Segoe UI";
+        ctx.fillStyle = "#222";
+        for(let i=0; i<n; i++) {
+          ctx.fillText(clases[i].marca, xs[i]-13, axisBottom+25);
+        }
+        // títulos
+        ctx.save();
+        ctx.font = "15px Segoe UI";
+        ctx.fillStyle = "#222";
+        ctx.fillText("Frecuencia (fi)", axisLeft-47, axisTop-15);
+        ctx.fillText("Marca de clase", (axisLeft+axisRight)/2-36, axisBottom+47);
+        ctx.restore();
+      }
+    }
+
+    // Interactividad y estado
+    function renderDatos() {
+      document.getElementById('datosBox').textContent = datos.join(', ');
+    }
+    function renderTab() {
+      const tabcontent = document.getElementById('tab-content');
+      document.getElementById('canvas').style.display = 'none';
+      document.getElementById('alerta').style.display = 'none';
+      if (tab === 'tbl') {
+        tabcontent.innerHTML = renderTabla(clases);
+      } else {
+        tabcontent.innerHTML = '';
+        document.getElementById('canvas').style.display = '';
+        const ctx = document.getElementById('canvas').getContext('2d');
+        if (tab === 'hist') drawHistograma(ctx, clases);
+        if (tab === 'poly') drawPoligono(ctx, clases);
+        if (tab === 'both') drawHistograma(ctx, clases, true); // overlayPoly = true
+      }
+      document.getElementById('tab-tbl').classList.toggle('active', tab==='tbl');
+      document.getElementById('tab-hist').classList.toggle('active', tab==='hist');
+      document.getElementById('tab-poly').classList.toggle('active', tab==='poly');
+      document.getElementById('tab-both').classList.toggle('active', tab==='both');
+    }
+    function setTab(t) {
+      tab = t;
+      renderTab();
+    }
+
+    function generarDatos() {
+      let n = parseInt(document.getElementById('numDatos').value);
+      datos = generarDatosAleatorios(n);
+      renderDatos();
+      actualizarAmplitud();
+      generarIntervalos();
+      document.getElementById('userDataInput').value = '';
+      document.getElementById('userDataMsg').textContent = '';
+    }
+
+    function generarIntervalos() {
+      let nclases = parseInt(document.getElementById('numClases').value);
+      let amplitud = parseInt(document.getElementById('amplitud').value);
+      let exacta = document.getElementById('amplitudExacta').checked;
+      clases = agruparDatos(datos, nclases, amplitud, exacta);
+      renderTab();
+    }
+
+    // Usar datos de usuario
+    function usarDatosUsuario() {
+      let val = document.getElementById('userDataInput').value;
+      let arr = val.split(",").map(x=>parseFloat(x.trim())).filter(x=>!isNaN(x));
+      if (arr.length < 4) {
+        document.getElementById('userDataMsg').textContent = "Ingresa al menos 4 datos válidos.";
+        return;
+      }
+      arr.sort((a,b)=>a-b);
+      datos = arr;
+      document.getElementById('userDataMsg').textContent = "¡Datos cargados!";
+      document.getElementById('datosBox').textContent = datos.join(', ');
+      actualizarAmplitud();
+      generarIntervalos();
+    }
+
+    // Inicialización
+    window.onload = () => {
+      generarDatos();
+    };
+    document.getElementById('numDatos').onchange = generarDatos;
+    document.getElementById('numClases').onchange = function() {
+      actualizarAmplitud();
+      generarIntervalos();
+    };
+    document.getElementById('amplitud').onchange = generarIntervalos;
+    document.getElementById('amplitudExacta').onchange = function() {
+      actualizarAmplitud();
+      generarIntervalos();
+    };
+
+    // Adaptar canvas a pantalla móvil
+    window.addEventListener('resize', ()=>{
+      let canvas = document.getElementById('canvas');
+      if (window.innerWidth < 750) {
+        canvas.width = window.innerWidth*0.95;
+      } else {
+        canvas.width = 700;
+      }
+      renderTab();
+    });
+
+  </script>
+</body>
+</html>

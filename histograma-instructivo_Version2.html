@@ -1,0 +1,272 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Instructivo: Histograma desde una Tabla de Frecuencias</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f8f9fa;
+      color: #222;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+    header {
+      background: #375a7f;
+      color: #fff;
+      padding: 1em 0;
+      text-align: center;
+    }
+    main {
+      max-width: 800px;
+      margin: 2em auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.07);
+      padding: 2em;
+    }
+    h2 {
+      color: #375a7f;
+      margin-top: 2em;
+    }
+    .step {
+      margin-bottom: 2.5em;
+    }
+    .example-table, .example-table th, .example-table td {
+      border: 1px solid #aaa;
+      border-collapse: collapse;
+      padding: 0.5em;
+      text-align: center;
+    }
+    .example-table {
+      margin: 1em 0;
+      width: 100%;
+    }
+    .controls {
+      text-align: center;
+      margin-bottom: 1em;
+    }
+    button {
+      background: #375a7f;
+      color: #fff;
+      border: none;
+      padding: 0.5em 1.5em;
+      border-radius: 4px;
+      margin: 0 0.5em;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button[disabled] {
+      background: #adb5bd;
+      cursor: not-allowed;
+    }
+    canvas {
+      background: #f4f6fa;
+      display: block;
+      margin: 1em auto;
+      border: 1px solid #d1d1d1;
+      border-radius: 5px;
+    }
+    .footer {
+      text-align: center;
+      color: #aaa;
+      margin-top: 2em;
+      font-size: 0.9em;
+    }
+    @media (max-width: 600px) {
+      main {
+        padding: 1em;
+      }
+      .example-table {
+        font-size: 0.95em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Cómo Generar un Histograma desde una Tabla de Frecuencias</h1>
+    <p>Instructivo paso a paso con gráficas ilustrativas | Elaborado por Pisc. Josafat Acosta</p>
+  </header>
+  <main>
+    <div id="instrucciones"></div>
+    <div class="controls">
+      <button id="prevBtn">Anterior</button>
+      <button id="nextBtn">Siguiente</button>
+    </div>
+    <canvas id="histCanvas" width="700" height="340"></canvas>
+  </main>
+  <div class="footer">
+    &copy; 2025 Estadística Descriptiva Aplicada | Lic. Josafat Acosta García
+  </div>
+  <script>
+    // Ejemplo de tabla de frecuencias
+    const frecuencias = [
+      { intervalo: "10-14", fi: 2 },
+      { intervalo: "15-19", fi: 4 },
+      { intervalo: "20-24", fi: 8 },
+      { intervalo: "25-29", fi: 5 },
+      { intervalo: "30-34", fi: 3 }
+    ];
+
+    // Instrucciones y pasos
+    const pasos = [
+      {
+        titulo: "1. Observa la Tabla de Frecuencias",
+        descripcion: `Supón que tienes la siguiente tabla de frecuencias para un conjunto de datos agrupados:`,
+        tabla: true,
+        dibujar: function(ctx) {
+          // No hay gráfico, solo tabla
+          ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+        }
+      },
+      {
+        titulo: "2. Dibuja los Ejes del Histograma",
+        descripcion: `Dibuja el eje horizontal (X) con los intervalos de clase, y el eje vertical (Y) con la escala de frecuencias.`,
+        tabla: false,
+        dibujar: function(ctx) {
+          clearCanvas(ctx);
+          drawAxes(ctx, frecuencias, true, false, false);
+        }
+      },
+      {
+        titulo: "3. Marca los Intervalos en el Eje X",
+        descripcion: `Coloca los límites de los intervalos de clase en el eje X.`,
+        tabla: false,
+        dibujar: function(ctx) {
+          clearCanvas(ctx);
+          drawAxes(ctx, frecuencias, true, true, false);
+        }
+      },
+      {
+        titulo: "4. Dibuja las Barras según la Frecuencia",
+        descripcion: `Por cada intervalo, dibuja una barra cuya altura corresponda a la frecuencia absoluta (fi).`,
+        tabla: false,
+        dibujar: function(ctx) {
+          clearCanvas(ctx);
+          drawAxes(ctx, frecuencias, true, true, true);
+        }
+      },
+      {
+        titulo: "5. Histograma Finalizado",
+        descripcion: `¡Listo! Ahora tienes tu histograma completo. Observa cómo representa gráficamente la distribución de las frecuencias.`,
+        tabla: false,
+        dibujar: function(ctx) {
+          clearCanvas(ctx);
+          drawAxes(ctx, frecuencias, true, true, true, true);
+        }
+      }
+    ];
+
+    // Renderiza instrucciones y tabla si aplica
+    function renderStep(idx) {
+      const paso = pasos[idx];
+      const cont = document.getElementById('instrucciones');
+      cont.innerHTML = `
+        <div class="step">
+          <h2>${paso.titulo}</h2>
+          <p>${paso.descripcion}</p>
+          ${paso.tabla ? renderTablaFrecuencias() : ""}
+        </div>
+      `;
+    }
+
+    function renderTablaFrecuencias() {
+      let html = `<table class="example-table"><tr><th>Intervalo</th><th>Frecuencia (fi)</th></tr>`;
+      for(const row of frecuencias) {
+        html += `<tr><td>${row.intervalo}</td><td>${row.fi}</td></tr>`;
+      }
+      html += "</table>";
+      return html;
+    }
+
+    // Dibuja los ejes y, opcionalmente, los intervalos y las barras
+    function drawAxes(ctx, data, showAxes, showIntervals, showBars, highlightFinal) {
+      const w = ctx.canvas.width, h = ctx.canvas.height;
+      const margin = 65, axisBottom = h - margin, axisLeft = margin;
+      const axisRight = w - margin, axisTop = margin;
+      // Escala
+      const maxFi = Math.max(...data.map(d => d.fi));
+      const barWidth = ((axisRight - axisLeft) / data.length) * 0.85;
+      // Ejes
+      if(showAxes) {
+        ctx.strokeStyle = '#222';
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(axisLeft, axisBottom);
+        ctx.lineTo(axisRight, axisBottom);
+        ctx.moveTo(axisLeft, axisBottom);
+        ctx.lineTo(axisLeft, axisTop-10);
+        ctx.stroke();
+        // Etiquetas de fi
+        ctx.font = "15px Segoe UI";
+        ctx.fillStyle = "#222";
+        for(let i=0; i<=maxFi; i+=2) {
+          const y = axisBottom - (i * (axisBottom-axisTop) / maxFi);
+          ctx.fillText(i, axisLeft-30, y+5);
+          ctx.strokeStyle="#bbb";
+          ctx.lineWidth=1;
+          ctx.beginPath();
+          ctx.moveTo(axisLeft-5, y);
+          ctx.lineTo(axisRight, y);
+          ctx.stroke();
+        }
+        ctx.lineWidth = 2;
+      }
+      // Intervalos
+      if(showIntervals) {
+        ctx.font = "15px Segoe UI";
+        ctx.fillStyle = "#375a7f";
+        for(let i=0; i<data.length; i++) {
+          const x = axisLeft + i*((axisRight-axisLeft)/data.length) + barWidth/2;
+          ctx.fillText(data[i].intervalo, x-18, axisBottom+25);
+        }
+      }
+      // Barras
+      if(showBars) {
+        for(let i=0; i<data.length; i++) {
+          const x = axisLeft + i*((axisRight-axisLeft)/data.length) + ((axisRight-axisLeft)/data.length-barWidth)/2;
+          const y = axisBottom - (data[i].fi * (axisBottom-axisTop) / maxFi);
+          ctx.fillStyle = highlightFinal ? "#2ecc71" : "#375a7f";
+          ctx.fillRect(x, y, barWidth, axisBottom-y);
+          // Etiqueta de frecuencia sobre la barra
+          ctx.fillStyle = "#222";
+          ctx.font = "bold 15px Segoe UI";
+          ctx.fillText(data[i].fi, x+barWidth/2-7, y-8);
+        }
+      }
+      // Ejes títulos
+      ctx.save();
+      ctx.font = "16px Segoe UI";
+      ctx.fillStyle = "#222";
+      ctx.fillText("Frecuencia (fi)", axisLeft-60, axisTop-15);
+      ctx.fillText("Intervalos", (axisLeft+axisRight)/2-40, axisBottom+50);
+      ctx.restore();
+    }
+
+    function clearCanvas(ctx) {
+      ctx.clearRect(0, 0, ctx.canvas.width, ctx.canvas.height);
+    }
+
+    // Control de pasos
+    let pasoActual = 0;
+    function showPaso(idx) {
+      pasoActual = idx;
+      renderStep(idx);
+      const ctx = document.getElementById('histCanvas').getContext('2d');
+      pasos[pasoActual].dibujar(ctx);
+      document.getElementById('prevBtn').disabled = idx === 0;
+      document.getElementById('nextBtn').disabled = idx === pasos.length - 1;
+    }
+    document.getElementById('prevBtn').onclick = () => showPaso(Math.max(0, pasoActual-1));
+    document.getElementById('nextBtn').onclick = () => showPaso(Math.min(pasos.length-1, pasoActual+1));
+
+    // Inicializar
+    showPaso(0);
+
+  </script>
+</body>
+</html>

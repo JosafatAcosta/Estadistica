@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Muestreo Estadístico - El Saber del Medievo</title>
+    <style>
+        :root {
+            --parchment: #f5e7d0;
+            --ink: #3a3226;
+            --red: #8b0000;
+            --gold: #d4af37;
+            --green: #556b2f;
+        }
+
+        html {
+            box-sizing: border-box;
+        }
+        *, *::before, *::after {
+            box-sizing: inherit;
+        }
+
+        body {
+            font-family: 'Times New Roman', serif;
+            background-color: var(--parchment);
+            color: var(--ink);
+            line-height: 1.6;
+            margin: 0;
+            padding: 0;
+            background-image: url('https://www.transparenttextures.com/patterns/old-paper.png');
+        }
+
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 16px;
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 2px solid var(--red);
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        header::before, header::after {
+            content: "✠";
+            color: var(--red);
+            font-size: 20px;
+            position: absolute;
+            bottom: -12px;
+        }
+
+        header::before {
+            left: 10%;
+        }
+
+        header::after {
+            right: 10%;
+        }
+
+        h1, h2, h3 {
+            color: var(--red);
+            font-family: 'Palatino Linotype', 'Book Antiqua', serif;
+        }
+
+        h1 {
+            font-size: 2rem;
+            text-shadow: 1px 1px 2px rgba(0,0,0,0.13);
+            margin-bottom: 0.4em;
+        }
+
+        h2 {
+            border-bottom: 1px dashed var(--green);
+            padding-bottom: 4px;
+            font-size: 1.3rem;
+            margin-top: 1.5em;
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            margin-top: 20px;
+        }
+
+        .card {
+            background-color: rgba(245, 231, 208, 0.95);
+            border: 1px solid var(--ink);
+            border-radius: 5px;
+            padding: 15px;
+            margin-bottom: 14px;
+            box-shadow: 1px 1px 7px rgba(0,0,0,0.09);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .card::after {
+            content: "";
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background: url('https://www.transparenttextures.com/patterns/rice-paper.png');
+            opacity: 0.12;
+            pointer-events: none;
+        }
+
+        .sampling-type {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin: 20px 0 0 0;
+        }
+
+        .sampling-card {
+            flex: 1 1 220px;
+            min-width: 180px;
+            max-width: 48%;
+            margin-bottom: 7px;
+            border: 1px solid var(--gold);
+            border-radius: 8px;
+            padding: 10px;
+            background-color: rgba(255, 255, 255, 0.38);
+            transition: transform 0.2s, box-shadow 0.2s;
+            cursor: pointer;
+            box-sizing: border-box;
+        }
+
+        .sampling-card:hover, .sampling-card:active {
+            transform: translateY(-2px) scale(1.01);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.11);
+        }
+
+        .sampling-card h3 {
+            margin-top: 0;
+            color: var(--green);
+            font-size: 1rem;
+        }
+
+        .probabilistic {
+            border-left: 4px solid var(--red);
+        }
+
+        .non-probabilistic {
+            border-left: 4px solid var(--gold);
+        }
+
+        .example {
+            font-style: italic;
+            background-color: rgba(139, 0, 0, 0.08);
+            padding: 7px;
+            border-radius: 5px;
+            margin-top: 7px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 14px 0;
+            background-color: rgba(245, 231, 208, 0.89);
+            font-size: 0.95em;
+        }
+
+        table, th, td {
+            border: 1px solid var(--ink);
+        }
+
+        th, td {
+            padding: 7px;
+            text-align: left;
+        }
+
+        th {
+            background-color: rgba(139, 0, 0, 0.15);
+            color: var(--red);
+        }
+
+        .exercise {
+            background-color: rgba(85, 107, 47, 0.09);
+            padding: 14px;
+            border-radius: 8px;
+            margin: 20px 0;
+        }
+
+        .question {
+            margin-bottom: 13px;
+        }
+
+        .options {
+            margin-left: 6px;
+            margin-bottom: 8px;
+        }
+
+        button {
+            background-color: var(--red);
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-family: 'Times New Roman', serif;
+            font-size: 1em;
+            transition: background-color 0.2s;
+            margin-top: 6px;
+        }
+
+        button:hover, button:active {
+            background-color: #6b0000;
+        }
+
+        .feedback {
+            margin-top: 10px;
+            padding: 8px;
+            border-radius: 5px;
+            display: none;
+            font-size: 0.98em;
+        }
+
+        .correct {
+            background-color: rgba(0, 128, 0, 0.14);
+            border-left: 4px solid green;
+        }
+
+        .incorrect {
+            background-color: rgba(255, 0, 0, 0.14);
+            border-left: 4px solid red;
+        }
+
+        .hidden {
+            display: none !important;
+        }
+
+        .tab-container {
+            display: flex;
+            margin-bottom: 2px;
+            flex-wrap: wrap;
+            gap: 6px;
+        }
+
+        .tab {
+            padding: 8px 12px;
+            background-color: rgba(139, 0, 0, 0.09);
+            border: 1px solid var(--ink);
+            border-bottom: none;
+            cursor: pointer;
+            border-radius: 5px 5px 0 0;
+            margin-right: 2px;
+            font-size: 0.98em;
+        }
+
+        .tab.active {
+            background-color: var(--parchment);
+            border-bottom: 1px solid var(--parchment);
+        }
+
+        .tab-content {
+            display: none;
+        }
+        .tab-content.active {
+            display: block;
+        }
+
+        .initial {
+            font-size: 2.2rem;
+            float: left;
+            line-height: 1;
+            margin-right: 7px;
+            color: var(--red);
+            font-family: 'Times New Roman', serif;
+        }
+
+        .decoration {
+            position: absolute;
+            font-size: 60px;
+            opacity: 0.09;
+            z-index: 0;
+        }
+
+        .decoration.top-right { top: 10px; right: 10px; }
+        .decoration.bottom-left { bottom: 10px; left: 10px; transform: rotate(180deg); }
+
+        /* Modal styles */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 9999;
+            left: 0; top: 0; width: 100vw; height: 100vh;
+            overflow: auto;
+            background-color: rgba(0,0,0,0.35);
+        }
+        .modal-content {
+            background-color: #fffbea;
+            margin: 50px auto;
+            padding: 20px 12px;
+            border: 2px solid var(--gold);
+            border-radius: 8px;
+            width: 95%;
+            max-width: 420px;
+            box-shadow: 0 3px 18px rgba(0,0,0,0.19);
+            position: relative;
+        }
+        .close-modal {
+            color: var(--red);
+            font-size: 1.8em;
+            font-weight: bold;
+            position: absolute;
+            top: 8px; right: 18px;
+            cursor: pointer;
+        }
+
+        /* Responsive styles */
+        @media (max-width: 660px) {
+            .container {
+                padding: 6px;
+            }
+            h1 { font-size: 1.15rem; }
+            h2 { font-size: 1rem; }
+            .sampling-type {
+                flex-direction: column;
+                gap: 10px;
+            }
+            .sampling-card {
+                max-width: 100%;
+                min-width: 0;
+            }
+            .decoration { font-size: 38px; }
+            .initial { font-size: 1.3rem; margin-right: 4px; }
+            table, th, td { font-size: 0.92em; }
+            .modal-content { padding: 12px 4px; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <div class="decoration top-right">✠</div>
+            <div class="decoration bottom-left">✠</div>
+            <h1>El Arte del Muestreo Estadístico</h1>
+            <p>Conocimientos ancestrales para los escribas de datos</p>
+        </header>
+        <div class="card">
+            <span class="initial">E</span>
+            <p>n el noble arte de la estadística, así como los antiguos alquimistas buscaban transformar metales en oro, nosotros buscamos transformar datos en conocimiento. Para ello, debemos dominar las técnicas de muestreo, que permiten seleccionar una parte representativa de la realidad para estudiarla con rigor.</p>
+            <p>Cada técnica tiene su propósito y sabiduría particular, y elegir la correcta puede significar la diferencia entre un estudio veraz y uno engañoso.</p>
+        </div>
+
+        <h2>Los Dos Grandes Reinos del Muestreo</h2>
+
+        <div class="tab-container" role="tablist">
+            <div class="tab active" onclick="openTab(event, 'probabilistic')" role="tab" aria-selected="true">Muestreo Probabilístico</div>
+            <div class="tab" onclick="openTab(event, 'non-probabilistic')" role="tab" aria-selected="false">Muestreo No Probabilístico</div>
+        </div>
+
+        <div id="probabilistic" class="tab-content active" role="tabpanel">
+            <div class="card">
+                <h3>El Reino del Azar Controlado</h3>
+                <p>En este noble reino, todos los súbditos (elementos de la población) tienen la posibilidad de ser elegidos para servir en la muestra. Es el método preferido por los sabios estadísticos cuando se busca rigor y representatividad.</p>
+                <div class="sampling-type">
+                    <div class="sampling-card probabilistic" onclick="showModal('simple')">
+                        <h3>1. Muestreo Aleatorio Simple</h3>
+                        <p>Como elegir nombres de un sombrero con los ojos vendados. Cada elemento tiene igual probabilidad de ser seleccionado.</p>
+                        <div class="example"><strong>Ejemplo:</strong> Asignar números a 1000 personas y usar una tabla de números aleatorios para seleccionar 100.</div>
+                    </div>
+                    <div class="sampling-card probabilistic" onclick="showModal('systematic')">
+                        <h3>2. Muestreo Aleatorio Sistemático</h3>
+                        <p>Seleccionar cada k-ésimo elemento después de un inicio aleatorio, como los peldaños equidistantes de una escalera espiral.</p>
+                        <div class="example"><strong>Ejemplo:</strong> De 5000 estudiantes, elegir cada 50º nombre empezando por un punto aleatorio.</div>
+                    </div>
+                    <div class="sampling-card probabilistic" onclick="showModal('stratified')">
+                        <h3>3. Muestreo Aleatorio Estratificado</h3>
+                        <p>Dividir el reino en provincias homogéneas (estratos) y tomar muestras de cada una proporcionalmente.</p>
+                        <div class="example"><strong>Ejemplo:</strong> Encuestar estudiantes divididos por facultad (Medicina, Derecho, Artes) en proporción a su tamaño.</div>
+                    </div>
+                    <div class="sampling-card probabilistic" onclick="showModal('cluster')">
+                        <h3>4. Muestreo por Conglomerados</h3>
+                        <p>Seleccionar aldeas completas al azar y estudiar a todos sus habitantes, en lugar de personas dispersas por todo el reino.</p>
+                        <div class="example"><strong>Ejemplo:</strong> Elegir aleatoriamente 10 barrios de una ciudad y encuestar a todos sus residentes.</div>
+                    </div>
+                    <div class="sampling-card probabilistic" onclick="showModal('multistage')">
+                        <h3>5. Muestreo Multietápico</h3>
+                        <p>Como una búsqueda en varios niveles: primero provincias, luego aldeas, finalmente hogares.</p>
+                        <div class="example"><strong>Ejemplo:</strong> Primero seleccionar estados, luego municipios dentro de esos estados, y finalmente hogares.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="non-probabilistic" class="tab-content" role="tabpanel">
+            <div class="card">
+                <h3>El Reino de la Sabiduría Práctica</h3>
+                <p>Cuando el azar no es posible o práctico, los estudiosos recurren a estos métodos. Aunque no permiten generalizar a toda la población, son útiles para explorar temas o cuando el acceso es limitado.</p>
+                <div class="sampling-type">
+                    <div class="sampling-card non-probabilistic" onclick="showModal('convenience')">
+                        <h3>1. Muestreo por Conveniencia</h3>
+                        <p>Como preguntar a los transeúntes en la plaza del mercado. Rápido pero potencialmente sesgado.</p>
+                        <div class="example"><strong>Ejemplo:</strong> Encuestar a los estudiantes que pasan por la biblioteca en una mañana.</div>
+                    </div>
+                    <div class="sampling-card non-probabilistic" onclick="showModal('judgment')">
+                        <h3>2. Muestreo por Juicio</h3>
+                        <p>El sabio selecciona personalmente a quienes considera más informados, como un rey eligiendo sus consejeros.</p>
+                        <div class="example"><strong>Ejemplo:</strong> Entrevistar a profesores veteranos sobre cambios en el sistema educativo.</div>
+                    </div>
+                    <div class="sampling-card non-probabilistic" onclick="showModal('quota')">
+                        <h3>3. Muestreo por Cuotas</h3>
+                        <p>Como asignar puestos en el consejo real a diferentes grupos sociales en proporciones fijas.</p>
+                        <div class="example"><strong>Ejemplo:</strong> Encuestar 50 jóvenes y 50 ancianos en un centro comercial.</div>
+                    </div>
+                    <div class="sampling-card non-probabilistic" onclick="showModal('snowball')">
+                        <h3>4. Muestreo de Bola de Nieve</h3>
+                        <p>Cada participante recomienda a otros, como los rumores que se esparcen de aldea en aldea.</p>
+                        <div class="example"><strong>Ejemplo:</strong> Estudiar comunidades marginales comenzando con unos pocos contactos que presentan a otros.</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <h2>Tabla Comparativa de los Reinos</h2>
+        <table>
+            <tr>
+                <th>Característica</th>
+                <th>Muestreo Probabilístico</th>
+                <th>Muestreo No Probabilístico</th>
+            </tr>
+            <tr>
+                <td>Selección</td>
+                <td>Aleatoria</td>
+                <td>No aleatoria</td>
+            </tr>
+            <tr>
+                <td>Generalización</td>
+                <td>Válida para inferencias</td>
+                <td>Limitada o subjetiva</td>
+            </tr>
+            <tr>
+                <td>Representatividad</td>
+                <td>Alta</td>
+                <td>Variable, puede tener sesgos</td>
+            </tr>
+            <tr>
+                <td>Dificultad</td>
+                <td>Mayor (requiere marco muestral)</td>
+                <td>Menor</td>
+            </tr>
+            <tr>
+                <td>Costo</td>
+                <td>Generalmente más alto</td>
+                <td>Generalmente más bajo</td>
+            </tr>
+            <tr>
+                <td>Uso común</td>
+                <td>Encuestas nacionales, estudios concluyentes</td>
+                <td>Estudios piloto, investigación cualitativa</td>
+            </tr>
+        </table>
+
+        <div class="card">
+            <h3>Sabiduría del Viejo Estadístico</h3>
+            <p>El muestreo probabilístico es como un torneo justo donde todos tienen oportunidad de competir, mientras que el no probabilístico es como cuando el rey elige sus favoritos basado en su propio criterio.</p>
+            <p>Para estudios que buscan representar fielmente a toda la población, el muestreo probabilístico es el camino del rigor. Pero cuando se exploran nuevas tierras del conocimiento o se estudian grupos difíciles de acceder, los métodos no probabilísticos pueden ser útiles.</p>
+        </div>
+
+        <h2>Prueba tu Sabiduría</h2>
+        <div class="exercise">
+            <div class="question">
+                <p>1. Un investigador quiere estudiar los hábitos de lectura en una ciudad. Primero divide la ciudad por distritos, luego selecciona aleatoriamente algunos distritos, y finalmente entrevista a todos los residentes de los distritos seleccionados. ¿Qué método es?</p>
+                <div class="options">
+                    <input type="radio" name="q1" id="q1a" value="a">
+                    <label for="q1a">a) Muestreo aleatorio simple</label><br>
+                    <input type="radio" name="q1" id="q1b" value="b">
+                    <label for="q1b">b) Muestreo por conglomerados</label><br>
+                    <input type="radio" name="q1" id="q1c" value="c">
+                    <label for="q1c">c) Muestreo estratificado</label><br>
+                    <input type="radio" name="q1" id="q1d" value="d">
+                    <label for="q1d">d) Muestreo por conveniencia</label>
+                </div>
+                <button onclick="checkAnswer(1, 'b')">Verificar</button>
+                <div id="feedback1" class="feedback"></div>
+            </div>
+            <div class="question">
+                <p>2. ¿Cuál de estos es un ejemplo de muestreo no probabilístico?</p>
+                <div class="options">
+                    <input type="radio" name="q2" id="q2a" value="a">
+                    <label for="q2a">a) Asignar números a todos los estudiantes y usar una tabla de números aleatorios para seleccionar una muestra</label><br>
+                    <input type="radio" name="q2" id="q2b" value="b">
+                    <label for="q2b">b) Dividir a los pacientes de un hospital por tipo de enfermedad y luego seleccionar aleatoriamente de cada grupo</label><br>
+                    <input type="radio" name="q2" id="q2c" value="c">
+                    <label for="q2c">c) Encuestar a las primeras 50 personas que entran a una tienda</label><br>
+                    <input type="radio" name="q2" id="q2d" value="d">
+                    <label for="q2d">d) Seleccionar cada 10º nombre de una lista después de un punto de inicio aleatorio</label>
+                </div>
+                <button onclick="checkAnswer(2, 'c')">Verificar</button>
+                <div id="feedback2" class="feedback"></div>
+            </div>
+            <div class="question">
+                <p>3. Un estudio sobre estilos de vida de inmigrantes comienza con tres participantes conocidos, quienes luego presentan a otros participantes. Esto es un ejemplo de:</p>
+                <div class="options">
+                    <input type="radio" name="q3" id="q3a" value="a">
+                    <label for="q3a">a) Muestreo estratificado</label><br>
+                    <input type="radio" name="q3" id="q3b" value="b">
+                    <label for="q3b">b) Muestreo de bola de nieve</label><br>
+                    <input type="radio" name="q3" id="q3c" value="c">
+                    <label for="q3c">c) Muestreo sistemático</label><br>
+                    <input type="radio" name="q3" id="q3d" value="d">
+                    <label for="q3d">d) Muestreo por conglomerados</label>
+                </div>
+                <button onclick="checkAnswer(3, 'b')">Verificar</button>
+                <div id="feedback3" class="feedback"></div>
+            </div>
+            <div class="question">
+                <p>4. ¿Qué ventaja principal tiene el muestreo probabilístico sobre el no probabilístico?</p>
+                <div class="options">
+                    <input type="radio" name="q4" id="q4a" value="a">
+                    <label for="q4a">a) Es siempre más barato y rápido</label><br>
+                    <input type="radio" name="q4" id="q4b" value="b">
+                    <label for="q4b">b) Permite hacer inferencias estadísticas sobre la población</label><br>
+                    <input type="radio" name="q4" id="q4c" value="c">
+                    <label for="q4c">c) No requiere un marco muestral</label><br>
+                    <input type="radio" name="q4" id="q4d" value="d">
+                    <label for="q4d">d) Es más fácil de implementar</label>
+                </div>
+                <button onclick="checkAnswer(4, 'b')">Verificar</button>
+                <div id="feedback4" class="feedback"></div>
+            </div>
+            <div class="question">
+                <p>5. Relaciona cada tipo de muestreo con su descripción:</p>
+                <div class="options">
+                    <select id="match1">
+                        <option value="">Selecciona una opción</option>
+                        <option value="a">Muestreo aleatorio simple</option>
+                        <option value="b">Muestreo estratificado</option>
+                        <option value="c">Muestreo por cuotas</option>
+                        <option value="d">Muestreo sistemático</option>
+                    </select>
+                    <label>1. Seleccionar cada k-ésimo elemento de una lista</label><br><br>
+                    <select id="match2">
+                        <option value="">Selecciona una opción</option>
+                        <option value="a">Muestreo aleatorio simple</option>
+                        <option value="b">Muestreo estratificado</option>
+                        <option value="c">Muestreo por cuotas</option>
+                        <option value="d">Muestreo sistemático</option>
+                    </select>
+                    <label>2. Todos los elementos tienen la misma probabilidad de ser seleccionados</label><br><br>
+                    <select id="match3">
+                        <option value="">Selecciona una opción</option>
+                        <option value="a">Muestreo aleatorio simple</option>
+                        <option value="b">Muestreo estratificado</option>
+                        <option value="c">Muestreo por cuotas</option>
+                        <option value="d">Muestreo sistemático</option>
+                    </select>
+                    <label>3. Dividir la población en grupos homogéneos y muestrear de cada uno</label><br><br>
+                    <select id="match4">
+                        <option value="">Selecciona una opción</option>
+                        <option value="a">Muestreo aleatorio simple</option>
+                        <option value="b">Muestreo estratificado</option>
+                        <option value="c">Muestreo por cuotas</option>
+                        <option value="d">Muestreo sistemático</option>
+                    </select>
+                    <label>4. Versión no probabilística del muestreo estratificado</label>
+                </div>
+                <button onclick="checkMatching()">Verificar</button>
+                <div id="feedback5" class="feedback"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="modal" class="modal hidden">
+        <div class="modal-content">
+            <span class="close-modal" onclick="closeModal()">&times;</span>
+            <div id="modal-content"></div>
+        </div>
+    </div>
+
+    <script>
+    // Tabs
+    function openTab(evt, tabName) {
+        const tabContents = document.getElementsByClassName("tab-content");
+        for (let i = 0; i < tabContents.length; i++) {
+            tabContents[i].classList.remove("active");
+        }
+        const tabs = document.getElementsByClassName("tab");
+        for (let i = 0; i < tabs.length; i++) {
+            tabs[i].classList.remove("active");
+            tabs[i].setAttribute('aria-selected','false');
+        }
+        document.getElementById(tabName).classList.add("active");
+        evt.currentTarget.classList.add("active");
+        evt.currentTarget.setAttribute('aria-selected','true');
+    }
+
+    // Modal
+    function showModal(samplingType) {
+        const modal = document.getElementById("modal");
+        const modalContent = document.getElementById("modal-content");
+        let title = "";
+        let description = "";
+        let example = "";
+        let whenUse = "";
+        let advantages = "";
+        let disadvantages = "";
+
+        switch(samplingType) {
+            case 'simple':
+                title = "Muestreo Aleatorio Simple";
+                description = "El método más básico y puro de muestreo probabilístico. Cada elemento de la población tiene exactamente la misma probabilidad de ser seleccionado, como nombres en un sombrero.";
+                example = "<strong>Ejemplo detallado:</strong> Tienes una lista de 1000 empleados y quieres una muestra de 100. Asignas un número a cada empleado y usas un generador de números aleatorios.";
+                whenUse = "<strong>Cuándo usarlo:</strong> Cuando la población es homogénea y tienes una lista completa de todos los elementos.";
+                advantages = "<strong>Ventajas:</strong> Simple de entender e implementar; análisis estadístico sencillo; mínimos sesgos de selección.";
+                disadvantages = "<strong>Desventajas:</strong> Requiere un marco muestral completo; puede ser costoso si la población está dispersa.";
+                break;
+            case 'systematic':
+                title = "Muestreo Aleatorio Sistemático";
+                description = "Se selecciona cada k-ésimo elemento de la población después de un inicio aleatorio. El intervalo k se calcula como población/muestra.";
+                example = "<strong>Ejemplo detallado:</strong> Para una muestra de 50 de 2000 estudiantes, k=2000/50=40. Eliges un número aleatorio entre 1 y 40 y luego seleccionas cada 40º estudiante.";
+                whenUse = "<strong>Cuándo usarlo:</strong> Cuando la lista de población no tiene patrones periódicos que coincidan con el intervalo k.";
+                advantages = "<strong>Ventajas:</strong> Más fácil de implementar que el aleatorio simple; distribución uniforme si no hay patrones.";
+                disadvantages = "<strong>Desventajas:</strong> Riesgo de sesgo si hay patrones en la lista.";
+                break;
+            case 'stratified':
+                title = "Muestreo Aleatorio Estratificado";
+                description = "La población se divide en subgrupos homogéneos (estratos) y se toma una muestra aleatoria de cada estrato. Puede ser proporcional o no al tamaño del estrato.";
+                example = "<strong>Ejemplo detallado:</strong> Para estudiar ingresos, divides la población por niveles educativos y muestreas proporcionalmente de cada grupo.";
+                whenUse = "<strong>Cuándo usarlo:</strong> Cuando hay subgrupos importantes que pueden afectar los resultados.";
+                advantages = "<strong>Ventajas:</strong> Mayor precisión; asegura representación de subgrupos; permite análisis por estrato.";
+                disadvantages = "<strong>Desventajas:</strong> Requiere conocimiento de los estratos; más complejo.";
+                break;
+            case 'cluster':
+                title = "Muestreo por Conglomerados";
+                description = "La población se divide en grupos heterogéneos (conglomerados), se seleccionan algunos al azar y se estudian todos sus elementos.";
+                example = "<strong>Ejemplo detallado:</strong> Para estudiar escuelas en un país, seleccionas aleatoriamente 10 distritos escolares y estudias todas las escuelas en esos distritos.";
+                whenUse = "<strong>Cuándo usarlo:</strong> Cuando la población está dispersa geográficamente.";
+                advantages = "<strong>Ventajas:</strong> Reduce costos; práctico para poblaciones grandes y dispersas.";
+                disadvantages = "<strong>Desventajas:</strong> Menos preciso que otros métodos; conglomerados pueden no ser representativos.";
+                break;
+            case 'multistage':
+                title = "Muestreo Multietápico";
+                description = "Combina dos o más métodos en etapas sucesivas, generalmente empezando con unidades grandes y terminando con individuos.";
+                example = "<strong>Ejemplo detallado:</strong> Seleccionar aleatoriamente estados, luego ciudades dentro de esos estados, y finalmente hogares.";
+                whenUse = "<strong>Cuándo usarlo:</strong> Para poblaciones muy grandes y complejas.";
+                advantages = "<strong>Ventajas:</strong> Flexible; reduce costos; puede combinar ventajas de diferentes métodos.";
+                disadvantages = "<strong>Desventajas:</strong> Diseño complejo; mayor error muestral si no se cuida cada etapa.";
+                break;
+            case 'convenience':
+                title = "Muestreo por Conveniencia";
+                description = "Se seleccionan los elementos más accesibles o disponibles para el investigador.";
+                example = "<strong>Ejemplo detallado:</strong> Encuestar a estudiantes en tu propia universidad o a personas en un centro comercial cercano.";
+                whenUse = "<strong>Cuándo usarlo:</strong> Para estudios exploratorios o pruebas piloto.";
+                advantages = "<strong>Ventajas:</strong> Rápido, económico y fácil.";
+                disadvantages = "<strong>Desventajas:</strong> Alto riesgo de sesgo; resultados no generalizables.";
+                break;
+            case 'judgment':
+                title = "Muestreo por Juicio o Experto";
+                description = "El investigador selecciona los elementos que considera más típicos o informados sobre el tema.";
+                example = "<strong>Ejemplo detallado:</strong> Entrevistar a directores de hospitales sobre gestión sanitaria.";
+                whenUse = "<strong>Cuándo usarlo:</strong> Cuando se necesita experiencia específica.";
+                advantages = "<strong>Ventajas:</strong> Acceso a información valiosa de expertos.";
+                disadvantages = "<strong>Desventajas:</strong> Subjetivo; depende completamente del criterio del investigador.";
+                break;
+            case 'quota':
+                title = "Muestreo por Cuotas";
+                description = "Versión no probabilística del estratificado. Se dividen la población en grupos y se asignan cuotas fijas para cada grupo.";
+                example = "<strong>Ejemplo detallado:</strong> Encuestar 100 personas: 50 hombres y 50 mujeres; de cada género, 25 jóvenes y 25 mayores.";
+                whenUse = "<strong>Cuándo usarlo:</strong> Cuando se quiere cierta representación de grupos pero no es posible el muestreo aleatorio.";
+                advantages = "<strong>Ventajas:</strong> Más representativo que el de conveniencia; más rápido y económico que el probabilístico.";
+                disadvantages = "<strong>Desventajas:</strong> Selección dentro de cuotas puede ser sesgada; no todos tienen probabilidad conocida de selección.";
+                break;
+            case 'snowball':
+                title = "Muestreo de Bola de Nieve";
+                description = "Los participantes iniciales reclutan a otros participantes entre sus conocidos, creciendo como una bola de nieve.";
+                example = "<strong>Ejemplo detallado:</strong> Estudiar inmigrantes comenzando con unos pocos contactos que presentan a otros.";
+                whenUse = "<strong>Cuándo usarlo:</strong> Para poblaciones difíciles de identificar o acceder.";
+                advantages = "<strong>Ventajas:</strong> Útil para poblaciones ocultas; construye confianza mediante referencias.";
+                disadvantages = "<strong>Desventajas:</strong> Alto riesgo de sesgo; resultados no generalizables.";
+                break;
+        }
+
+        modalContent.innerHTML = `
+            <h2>${title}</h2>
+            <p>${description}</p>
+            <div class="card">${example}</div>
+            <h3>Consideraciones</h3>
+            <p>${whenUse}</p>
+            <p>${advantages}</p>
+            <p>${disadvantages}</p>
+        `;
+
+        modal.classList.remove("hidden");
+        modal.style.display = "block";
+    }
+
+    function closeModal() {
+        document.getElementById("modal").classList.add("hidden");
+        document.getElementById("modal").style.display = "none";
+    }
+
+    window.onclick = function(event) {
+        const modal = document.getElementById("modal");
+        if (event.target == modal) {
+            closeModal();
+        }
+    }
+
+    // Quiz
+    function checkAnswer(questionNum, correctAnswer) {
+        const selectedOption = document.querySelector(`input[name="q${questionNum}"]:checked`);
+        const feedback = document.getElementById(`feedback${questionNum}`);
+
+        if (!selectedOption) {
+            feedback.textContent = "Por favor, selecciona una respuesta.";
+            feedback.className = "feedback";
+            feedback.style.display = "block";
+            return;
+        }
+
+        if (selectedOption.value === correctAnswer) {
+            feedback.innerHTML = "<strong>¡Correcto!</strong> Tu respuesta demuestra gran sabiduría estadística.";
+            feedback.className = "feedback correct";
+        } else {
+            feedback.innerHTML = "<strong>Incorrecto.</strong> Reflexiona nuevamente sobre los métodos de muestreo.";
+            feedback.className = "feedback incorrect";
+        }
+
+        feedback.style.display = "block";
+    }
+
+    function checkMatching() {
+        const match1 = document.getElementById("match1").value;
+        const match2 = document.getElementById("match2").value;
+        const match3 = document.getElementById("match3").value;
+        const match4 = document.getElementById("match4").value;
+        const feedback = document.getElementById("feedback5");
+
+        if (!match1 || !match2 || !match3 || !match4) {
+            feedback.textContent = "Por favor, completa todas las relaciones.";
+            feedback.className = "feedback";
+            feedback.style.display = "block";
+            return;
+        }
+
+        let correctCount = 0;
+        if (match1 === "d") correctCount++;
+        if (match2 === "a") correctCount++;
+        if (match3 === "b") correctCount++;
+        if (match4 === "c") correctCount++;
+
+        const percentage = (correctCount / 4) * 100;
+
+        if (percentage === 100) {
+            feedback.innerHTML = "<strong>¡Perfecto! (100%)</strong> Dominas los tipos de muestreo como un verdadero erudito medieval.";
+            feedback.className = "feedback correct";
+        } else if (percentage >= 50) {
+            feedback.innerHTML = `<strong>¡Buen trabajo! (${percentage}%)</strong> Tienes buen conocimiento, pero aún puedes mejorar. Revisa los métodos que no acertaste.`;
+            feedback.className = "feedback";
+        } else {
+            feedback.innerHTML = `<strong>Necesitas estudiar más. (${percentage}%)</strong> Te recomiendo repasar los diferentes métodos de muestreo.`;
+            feedback.className = "feedback incorrect";
+        }
+
+        feedback.style.display = "block";
+    }
+    </script>
+</body>
+</html>

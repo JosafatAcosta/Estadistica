@@ -1,0 +1,535 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Ejercicio Completo: Tablas de Frecuencias, Histograma y Polígono</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      background: #f8f9fa;
+      color: #222;
+      margin: 0;
+      padding: 0;
+      line-height: 1.6;
+    }
+    header {
+      background: #2c3e50;
+      color: #fff;
+      padding: 1em 0;
+      text-align: center;
+    }
+    main {
+      max-width: 900px;
+      margin: 2em auto;
+      background: #fff;
+      border-radius: 8px;
+      box-shadow: 0 2px 12px rgba(0,0,0,.07);
+      padding: 2em;
+    }
+    h2 {
+      color: #2c3e50;
+      margin-top: 2em;
+    }
+    .step {
+      margin-bottom: 2.5em;
+    }
+    .example-table, .example-table th, .example-table td {
+      border: 1px solid #aaa;
+      border-collapse: collapse;
+      padding: 0.5em;
+      text-align: center;
+    }
+    .example-table {
+      margin: 1em 0;
+      width: 100%;
+    }
+    .controls {
+      text-align: center;
+      margin-bottom: 1em;
+    }
+    button {
+      background: #2c3e50;
+      color: #fff;
+      border: none;
+      padding: 0.5em 1.5em;
+      border-radius: 4px;
+      margin: 0 0.5em;
+      font-size: 1em;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+    button[disabled] {
+      background: #adb5bd;
+      cursor: not-allowed;
+    }
+    canvas {
+      background: #f4f6fa;
+      display: block;
+      margin: 1em auto;
+      border: 1px solid #d1d1d1;
+      border-radius: 5px;
+    }
+    .footer {
+      text-align: center;
+      color: #aaa;
+      margin-top: 2em;
+      font-size: 0.9em;
+    }
+    .highlight {
+      background: #eafaf1;
+      border-left: 4px solid #27ae60;
+      padding: 0.5em 1em;
+      margin: 1em 0;
+    }
+    @media (max-width: 600px) {
+      main {
+        padding: 1em;
+      }
+      .example-table {
+        font-size: 0.95em;
+      }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Ejercicio Completo: Tablas de Frecuencias, Histograma y Polígono</h1>
+    <p>Comparando tablas semicerradas y semiabiertas</p>
+  </header>
+  <main>
+    <div id="instrucciones"></div>
+    <div class="controls">
+      <button id="prevBtn">Anterior</button>
+      <button id="nextBtn">Siguiente</button>
+    </div>
+    <canvas id="canvas" width="820" height="370"></canvas>
+  </main>
+  <div class="footer">
+    &copy; 2025 Estadística Descriptiva Aplicada | Lic. Josafat Acosta García 
+  </div>
+  <script>
+    // Datos simulados: 50 datos agrupados en clases
+    // Usamos los mismos datos para ambas tablas, solo cambia el modo de intervalos
+
+    // Tabla semicerrada: [a, b)
+    const tablaSemiCerrada = [
+      { clase: "[10, 15)", fi: 2 },
+      { clase: "[15, 20)", fi: 7 },
+      { clase: "[20, 25)", fi: 16 },
+      { clase: "[25, 30)", fi: 14 },
+      { clase: "[30, 35)", fi: 8 },
+      { clase: "[35, 40)", fi: 3 }
+    ];
+
+    // Tabla semiabierta: (a, b]
+    const tablaSemiAbierta = [
+      { clase: "(9, 15]", fi: 2 },
+      { clase: "(15, 20]", fi: 7 },
+      { clase: "(20, 25]", fi: 16 },
+      { clase: "(25, 30]", fi: 14 },
+      { clase: "(30, 35]", fi: 8 },
+      { clase: "(35, 40]", fi: 3 }
+    ];
+
+    // Marcas de clase para cada tabla
+    function marcasClase(tabla, tipo) {
+      return tabla.map(row => {
+        let a, b;
+        if (tipo === "semicerrada") {
+          [a, b] = row.clase.replace("[", "").replace(")", "").split(",");
+        } else {
+          [a, b] = row.clase.replace("(", "").replace("]", "").split(",");
+        }
+        return (parseFloat(a) + parseFloat(b)) / 2;
+      });
+    }
+
+    // Paso a paso
+    const pasos = [
+      {
+        titulo: "1. Datos y Objetivo",
+        descripcion: `
+          <div>
+            <strong>Ejercicio:</strong> Se recolectaron 50 observaciones de la variable <b>Edad</b> en cierto grupo de personas.<br>
+            Queremos analizar cómo se distribuyen usando diferentes tipos de intervalos en la tabla de frecuencias.<br>
+            <br>
+            <div class="highlight">
+              <b>Compararemos:</b> <br>
+              <ul>
+                <li>Tabla <b>semicerrada</b> (&rarr; de la forma [a, b), donde el extremo superior no se incluye).</li>
+                <li>Tabla <b>semiabierta</b> (&rarr; de la forma (a, b], donde el extremo inferior no se incluye).</li>
+              </ul>
+            </div>
+          </div>
+        `,
+        dibujar: ctx => ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height),
+      },
+      {
+        titulo: "2. Tabla de Frecuencias Semicerrada [a, b)",
+        descripcion: `
+          <div>
+            <b>Tabla semicerrada:</b> Nota cómo cada clase incluye el extremo inferior, pero <b>no</b> el superior.<br>
+            Ejemplo: En [10, 15), se incluyen los valores &ge; 10 y &lt; 15.
+          </div>
+          ${renderTabla(tablaSemiCerrada, "Marca de clase (x<sub>i</sub>)", marcasClase(tablaSemiCerrada, "semicerrada"))}
+        `,
+        dibujar: ctx => ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height),
+        tabla: "semicerrada"
+      },
+      {
+        titulo: "3. Tabla de Frecuencias Semiabierta (a, b]",
+        descripcion: `
+          <div>
+            <b>Tabla semiabierta:</b> Ahora cada clase <b>no</b> incluye el extremo inferior, pero sí el superior.<br>
+            Ejemplo: En (10, 15], se incluyen los valores &gt; 10 y &le; 15.
+          </div>
+          ${renderTabla(tablaSemiAbierta, "Marca de clase (x<sub>i</sub>)", marcasClase(tablaSemiAbierta, "semiabierta"))}
+        `,
+        dibujar: ctx => ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height),
+        tabla: "semiabierta"
+      },
+      {
+        titulo: "4. Comparación Visual de las Tablas",
+        descripcion: `
+          <div>
+            <b>Importancia:</b> El tipo de intervalo puede cambiar a qué clase pertenece un dato en el límite.<br>
+            <div class="highlight">
+              Por ejemplo, el valor 15:<br>
+              <ul>
+                <li>En la tabla semicerrada ([10, 15)), <b>NO</b> se cuenta en la primera clase, sino en la segunda ([15, 20)).</li>
+                <li>En la semiabierta ((9, 15]), <b>SÍ</b> se cuenta en la primera clase.</li>
+              </ul>
+              <br>
+              <b>¡Esto puede afectar la forma de tus gráficos!</b>
+            </div>
+          </div>
+        `,
+        dibujar: ctx => {
+          ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+          // Pequeño gráfico de barras lado a lado para comparar frecuencias
+          drawSideBySideBars(ctx, tablaSemiCerrada, tablaSemiAbierta);
+        }
+      },
+      {
+        titulo: "5. Histograma (Semicerrada)",
+        descripcion: `
+          <div>
+            <b>Histograma:</b> Ahora representamos la tabla semicerrada con un histograma.<br>
+            Observa cómo cada barra representa el intervalo [a, b).
+          </div>
+        `,
+        dibujar: ctx => {
+          ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+          drawHistogram(ctx, tablaSemiCerrada, "semicerrada");
+        }
+      },
+      {
+        titulo: "6. Polígono de Frecuencias (Semicerrada)",
+        descripcion: `
+          <div>
+            <b>Polígono de frecuencias:</b> Usamos las marcas de clase y las frecuencias para construir el polígono.<br>
+            Es útil para visualizar tendencias y comparar distribuciones.
+          </div>
+        `,
+        dibujar: ctx => {
+          ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+          drawPolygon(ctx, tablaSemiCerrada, "semicerrada");
+        }
+      },
+      {
+        titulo: "7. Histograma (Semiabierta)",
+        descripcion: `
+          <div>
+            <b>Histograma:</b> Ahora representamos la tabla semiabierta con un histograma.<br>
+            Observa las pequeñas diferencias en las barras respecto al caso semicerrado.
+          </div>
+        `,
+        dibujar: ctx => {
+          ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+          drawHistogram(ctx, tablaSemiAbierta, "semiabierta");
+        }
+      },
+      {
+        titulo: "8. Polígono de Frecuencias (Semiabierta)",
+        descripcion: `
+          <div>
+            <b>Polígono de frecuencias:</b> Polígono usando la tabla semiabierta.<br>
+            Compáralo visualmente con el de la tabla semicerrada.
+          </div>
+        `,
+        dibujar: ctx => {
+          ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height);
+          drawPolygon(ctx, tablaSemiAbierta, "semiabierta");
+        }
+      },
+      {
+        titulo: "9. Reflexión Final",
+        descripcion: `
+          <div>
+            <b>Conclusión:</b> <br>
+            <ul>
+              <li>El tipo de intervalo en la tabla afecta la asignación de los datos y, por lo tanto, la forma de los gráficos.</li>
+              <li>Siempre especifica y comprende el tipo de intervalo utilizado, especialmente al comparar distribuciones o reportar resultados.</li>
+            </ul>
+          </div>
+        `,
+        dibujar: ctx => ctx.clearRect(0,0,ctx.canvas.width,ctx.canvas.height)
+      }
+    ];
+
+    // Renderiza tabla con marcas de clase
+    function renderTabla(tabla, encabezadoMarca, marcas) {
+      let html = `<table class="example-table"><tr><th>Clase</th><th>${encabezadoMarca}</th><th>Frecuencia (fi)</th></tr>`;
+      for(let i=0; i<tabla.length; i++) {
+        html += `<tr><td>${tabla[i].clase}</td><td>${marcas[i]}</td><td>${tabla[i].fi}</td></tr>`;
+      }
+      html += "</table>";
+      return html;
+    }
+
+    // Gráfico para comparación visual lado a lado
+    function drawSideBySideBars(ctx, tabla1, tabla2) {
+      const w = ctx.canvas.width, h = ctx.canvas.height;
+      const margin = 70, axisBottom = h - margin, axisLeft = margin;
+      const axisRight = w - margin, axisTop = margin;
+      const clases = tabla1.map(r => r.clase);
+      const n = clases.length;
+      const barGap = 10;
+      const barWidth = ((axisRight-axisLeft)/n - barGap)/2;
+      const maxFi = Math.max(
+        ...tabla1.map(r=>r.fi),
+        ...tabla2.map(r=>r.fi)
+      );
+      // Ejes
+      ctx.strokeStyle = '#222';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(axisLeft, axisBottom);
+      ctx.lineTo(axisRight, axisBottom);
+      ctx.moveTo(axisLeft, axisBottom);
+      ctx.lineTo(axisLeft, axisTop-10);
+      ctx.stroke();
+      // Etiquetas Y
+      ctx.font = "15px Segoe UI";
+      ctx.fillStyle = "#222";
+      for(let i=0; i<=maxFi; i+=3) {
+        const y = axisBottom - (i * (axisBottom-axisTop) / maxFi);
+        ctx.fillText(i, axisLeft-30, y+6);
+        ctx.strokeStyle="#bbb";
+        ctx.lineWidth=1;
+        ctx.beginPath();
+        ctx.moveTo(axisLeft-5, y);
+        ctx.lineTo(axisRight, y);
+        ctx.stroke();
+      }
+      ctx.lineWidth=2;
+      // Barras
+      for(let i=0; i<n; i++) {
+        const x0 = axisLeft + i*((axisRight-axisLeft)/n);
+        // semicerrada azul
+        ctx.fillStyle="#2980b9";
+        const y1 = axisBottom - (tabla1[i].fi * (axisBottom-axisTop) / maxFi);
+        ctx.fillRect(x0, y1, barWidth, axisBottom-y1);
+        // semiabierta verde
+        ctx.fillStyle="#27ae60";
+        const y2 = axisBottom - (tabla2[i].fi * (axisBottom-axisTop) / maxFi);
+        ctx.fillRect(x0+barWidth+barGap, y2, barWidth, axisBottom-y2);
+      }
+      // etiquetas clases
+      ctx.font = "13px Segoe UI";
+      ctx.fillStyle = "#222";
+      for(let i=0; i<n; i++) {
+        const x0 = axisLeft + i*((axisRight-axisLeft)/n);
+        ctx.save();
+        ctx.translate(x0+barWidth, axisBottom+22);
+        ctx.rotate(-Math.PI/8);
+        ctx.fillText(clases[i], 0,0);
+        ctx.restore();
+      }
+      // leyenda
+      ctx.fillStyle="#2980b9";
+      ctx.fillRect(axisRight-170, axisTop+6, 18, 18);
+      ctx.fillStyle="#222";
+      ctx.fillText("Semicerrada", axisRight-145, axisTop+20);
+      ctx.fillStyle="#27ae60";
+      ctx.fillRect(axisRight-170, axisTop+33, 18, 18);
+      ctx.fillStyle="#222";
+      ctx.fillText("Semiabierta", axisRight-145, axisTop+47);
+    }
+
+    // Histograma
+    function drawHistogram(ctx, tabla, tipo) {
+      const w = ctx.canvas.width, h = ctx.canvas.height;
+      const margin = 70, axisBottom = h - margin, axisLeft = margin;
+      const axisRight = w - margin, axisTop = margin;
+      const n = tabla.length;
+      const maxFi = Math.max(...tabla.map(r=>r.fi));
+      // Ejes
+      ctx.strokeStyle = '#222';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(axisLeft, axisBottom);
+      ctx.lineTo(axisRight, axisBottom);
+      ctx.moveTo(axisLeft, axisBottom);
+      ctx.lineTo(axisLeft, axisTop-10);
+      ctx.stroke();
+      // Etiquetas Y
+      ctx.font = "15px Segoe UI";
+      ctx.fillStyle = "#222";
+      for(let i=0; i<=maxFi; i+=3) {
+        const y = axisBottom - (i * (axisBottom-axisTop) / maxFi);
+        ctx.fillText(i, axisLeft-30, y+6);
+        ctx.strokeStyle="#bbb";
+        ctx.lineWidth=1;
+        ctx.beginPath();
+        ctx.moveTo(axisLeft-5, y);
+        ctx.lineTo(axisRight, y);
+        ctx.stroke();
+      }
+      ctx.lineWidth=2;
+      // Barras
+      const barWidth = ((axisRight-axisLeft)/n) * 0.95;
+      let marcas = marcasClase(tabla, tipo);
+      for(let i=0; i<n; i++) {
+        const x = axisLeft + i*((axisRight-axisLeft)/n) + (((axisRight-axisLeft)/n)-barWidth)/2;
+        const y = axisBottom - (tabla[i].fi * (axisBottom-axisTop) / maxFi);
+        ctx.fillStyle="#2980b9";
+        ctx.fillRect(x, y, barWidth, axisBottom-y);
+        ctx.font = "bold 15px Segoe UI";
+        ctx.fillStyle = "#fff";
+        ctx.fillText(tabla[i].fi, x+barWidth/2-8, y+18);
+      }
+      // etiquetas clases
+      ctx.font = "14px Segoe UI";
+      ctx.fillStyle = "#222";
+      for(let i=0; i<n; i++) {
+        const x = axisLeft + i*((axisRight-axisLeft)/n) + barWidth/2-27;
+        ctx.fillText(tabla[i].clase, x, axisBottom+25);
+      }
+      // títulos ejes
+      ctx.save();
+      ctx.font = "16px Segoe UI";
+      ctx.fillStyle = "#222";
+      ctx.fillText("Frecuencia (fi)", axisLeft-60, axisTop-15);
+      ctx.fillText("Clases", (axisLeft+axisRight)/2-30, axisBottom+50);
+      ctx.restore();
+    }
+
+    // Polígono de frecuencias
+    function drawPolygon(ctx, tabla, tipo) {
+      const w = ctx.canvas.width, h = ctx.canvas.height;
+      const margin = 70, axisBottom = h - margin, axisLeft = margin;
+      const axisRight = w - margin, axisTop = margin;
+      const n = tabla.length;
+      const maxFi = Math.max(...tabla.map(r=>r.fi));
+      // Ejes
+      ctx.strokeStyle = '#222';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(axisLeft, axisBottom);
+      ctx.lineTo(axisRight, axisBottom);
+      ctx.moveTo(axisLeft, axisBottom);
+      ctx.lineTo(axisLeft, axisTop-10);
+      ctx.stroke();
+      // Etiquetas Y
+      ctx.font = "15px Segoe UI";
+      ctx.fillStyle = "#222";
+      for(let i=0; i<=maxFi; i+=3) {
+        const y = axisBottom - (i * (axisBottom-axisTop) / maxFi);
+        ctx.fillText(i, axisLeft-30, y+6);
+        ctx.strokeStyle="#bbb";
+        ctx.lineWidth=1;
+        ctx.beginPath();
+        ctx.moveTo(axisLeft-5, y);
+        ctx.lineTo(axisRight, y);
+        ctx.stroke();
+      }
+      ctx.lineWidth=2;
+      // Polígono
+      let marcas = marcasClase(tabla, tipo);
+      // Escala X: repartir marcas equidistantes en el eje
+      const xs = [];
+      for(let i=0; i<marcas.length; i++) {
+        xs.push(axisLeft + i*((axisRight-axisLeft)/(n-1)));
+      }
+      const getY = fi => axisBottom - (fi * (axisBottom-axisTop) / maxFi);
+      ctx.strokeStyle="#e67e22";
+      ctx.lineWidth=3;
+      ctx.beginPath();
+      // Punto inicial a fi=0
+      ctx.moveTo(xs[0], axisBottom);
+      for(let i=0; i<n; i++) {
+        ctx.lineTo(xs[i], getY(tabla[i].fi));
+      }
+      ctx.lineTo(xs[n-1], axisBottom);
+      ctx.stroke();
+      ctx.globalAlpha=0.15;
+      ctx.fillStyle="#e67e22";
+      ctx.beginPath();
+      ctx.moveTo(xs[0], axisBottom);
+      for(let i=0; i<n; i++) {
+        ctx.lineTo(xs[i], getY(tabla[i].fi));
+      }
+      ctx.lineTo(xs[n-1], axisBottom);
+      ctx.closePath();
+      ctx.fill();
+      ctx.globalAlpha=1;
+      // Puntos
+      for(let i=0; i<n; i++) {
+        ctx.beginPath();
+        ctx.arc(xs[i], getY(tabla[i].fi), 6, 0, 2*Math.PI);
+        ctx.fillStyle="#e67e22";
+        ctx.fill();
+        ctx.strokeStyle = "#b35406";
+        ctx.lineWidth = 2;
+        ctx.stroke();
+        ctx.font = "bold 15px Segoe UI";
+        ctx.fillStyle = "#222";
+        ctx.fillText(tabla[i].fi, xs[i]-7, getY(tabla[i].fi)-15);
+      }
+      // etiquetas marcas de clase
+      ctx.font = "15px Segoe UI";
+      ctx.fillStyle = "#222";
+      for(let i=0; i<n; i++) {
+        ctx.fillText(marcas[i], xs[i]-13, axisBottom+25);
+      }
+      // títulos
+      ctx.save();
+      ctx.font = "16px Segoe UI";
+      ctx.fillStyle = "#222";
+      ctx.fillText("Frecuencia (fi)", axisLeft-60, axisTop-15);
+      ctx.fillText("Marca de clase", (axisLeft+axisRight)/2-38, axisBottom+50);
+      ctx.restore();
+    }
+
+    // Control de pasos
+    let pasoActual = 0;
+    function showPaso(idx) {
+      pasoActual = idx;
+      renderStep(idx);
+      const ctx = document.getElementById('canvas').getContext('2d');
+      pasos[pasoActual].dibujar(ctx);
+      document.getElementById('prevBtn').disabled = idx === 0;
+      document.getElementById('nextBtn').disabled = idx === pasos.length - 1;
+    }
+    function renderStep(idx) {
+      const paso = pasos[idx];
+      const cont = document.getElementById('instrucciones');
+      cont.innerHTML = `
+        <div class="step">
+          <h2>${paso.titulo}</h2>
+          ${paso.descripcion}
+        </div>
+      `;
+    }
+
+    document.getElementById('prevBtn').onclick = () => showPaso(Math.max(0, pasoActual-1));
+    document.getElementById('nextBtn').onclick = () => showPaso(Math.min(pasos.length-1, pasoActual+1));
+
+    // Inicializar
+    showPaso(0);
+
+  </script>
+</body>
+</html>
