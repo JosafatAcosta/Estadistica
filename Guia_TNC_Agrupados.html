@@ -1,0 +1,790 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guía Didáctica: Media, Mediana y Moda para Datos Agrupados</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f7f7fa;
+      min-height: 100vh;
+      color: #234;
+    }
+    header {
+      background: #2d72d9;
+      color: #fff;
+      text-align: center;
+      padding: 2rem 1rem 1.2rem 1rem;
+      font-size: 2rem;
+      letter-spacing: 1px;
+    }
+    .main-container {
+      max-width: 850px;
+      margin: 2rem auto;
+      background: #fff;
+      border-radius: 1.5rem;
+      box-shadow: 0 6px 24px rgba(44,62,80,0.14);
+      padding: 2rem 1.5rem;
+      min-height: 500px;
+      position: relative;
+      overflow: hidden;
+    }
+    .step-title {
+      color: #2056b3;
+      font-size: 1.35rem;
+      margin-bottom: 0.8rem;
+      font-weight: bold;
+    }
+    .step-description {
+      font-size: 1.07rem;
+      margin-bottom: 1.2rem;
+      color: #234;
+      line-height: 1.6;
+    }
+    .concept-ref {
+      background: #e0e7ff;
+      border-left: 4px solid #2d72d9;
+      padding: 0.7rem 1.2rem;
+      border-radius: 0.8rem;
+      color: #2056b3;
+      margin-bottom: 1.1rem;
+      font-size: 1.04rem;
+      font-style: italic;
+    }
+    .nav-controls {
+      margin-top: 2.5rem;
+      display: flex;
+      justify-content: space-between;
+    }
+    .nav-btn {
+      background: #2d72d9;
+      color: #fff;
+      border: none;
+      border-radius: 0.7rem;
+      padding: 0.8rem 2.1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.07);
+    }
+    .nav-btn:disabled {
+      background: #b6cffb;
+      cursor: not-allowed;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: #2056b3;
+    }
+    .input-data-section {
+      margin: 1.1rem 0 1.9rem 0;
+      padding: 1rem 1.2rem;
+      background: #f0f4fa;
+      border-radius: 0.7rem;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.03);
+      color: #2056b3;
+    }
+    .input-data-section label {
+      font-weight: bold;
+      color: #2056b3;
+    }
+    .input-data-section input {
+      margin-left: 0.7rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 0.3rem;
+      border: 1px solid #b6cffb;
+      font-size: 1em;
+    }
+    #chart-container {
+      margin: 2rem 0 1rem 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 280px;
+      background: #f7f7fa;
+      border-radius: 1rem;
+      border: 1px solid #e0e7ff;
+      box-shadow: 0 1px 8px rgba(44,62,80,0.06);
+    }
+    canvas {
+      background: #fff;
+      border-radius: 1rem;
+      margin: 0 auto;
+      display: block;
+    }
+    .footer-credit {
+      text-align: center;
+      color: #2056b3;
+      font-size: 1.07rem;
+      margin-top: 2.5rem;
+      margin-bottom: 0.8rem;
+      font-style: italic;
+      line-height: 1.35;
+      opacity: 0.88;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 1rem 0;
+    }
+    th, td {
+      border: 1px solid #b6cffb;
+      padding: 0.5rem;
+      text-align: center;
+    }
+    th {
+      background-color: #e0e7ff;
+    }
+    .data-table-container {
+      overflow-x: auto;
+    }
+    @media (max-width: 600px) {
+      header { font-size: 1.1rem; padding: 1.2rem 0.5rem; }
+      .main-container { padding: 0.7rem 0.2rem; }
+      .step-title { font-size: 1.1rem;}
+      #chart-container { min-height: 180px;}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    Guía Didáctica Interactiva: Media, Mediana y Moda para Datos Agrupados
+  </header>
+  <div class="main-container">
+    <div id="step-content"></div>
+    <div class="nav-controls">
+      <button class="nav-btn" id="prevBtn" onclick="prevStep()">Anterior</button>
+      <button class="nav-btn" id="nextBtn" onclick="nextStep()">Siguiente</button>
+    </div>
+  </div>
+  <div class="footer-credit">
+    Basado en las enseñanzas de David Anderson.<br>
+    Elaborado para aprendizaje interactivo de estadística básica.
+  </div>
+  <script>
+    // --- Datos y Estado ---
+    let currentStep = 0;
+    let groupedData = [
+      { lower: 10, upper: 20, frequency: 5 },
+      { lower: 20, upper: 30, frequency: 8 },
+      { lower: 30, upper: 40, frequency: 12 },
+      { lower: 40, upper: 50, frequency: 7 },
+      { lower: 50, upper: 60, frequency: 3 }
+    ]; // Datos de ejemplo
+
+    // --- Componentes de cada paso ---
+    const steps = [
+      // 0: Introducción
+      {
+        title: "Bienvenida: ¿Qué aprenderás?",
+        description: `
+        <b>¡Bienvenido/a!</b> En esta guía didáctica interactiva vas a aprender, paso a paso, cómo calcular y comprender la <b>media</b>, la <b>mediana</b> y la <b>moda</b> para <b>datos agrupados</b>.<br><br>
+        Para cada medida:
+        <ul>
+          <li>Aprenderás el concepto según <b>David R. Anderson</b> adaptado a datos agrupados.</li>
+          <li>Descubrirás cómo calcularla paso a paso usando intervalos y frecuencias.</li>
+          <li>Visualizarás cómo se observa en una gráfica de histograma.</li>
+        </ul>
+        <b>¡Comencemos!</b> Haz clic en "Siguiente".
+        `,
+        showInput: false,
+        chartType: null
+      },
+      // 1: Datos y entrada
+      {
+        title: "Paso 1: Introduce tus datos agrupados o usa el ejemplo",
+        description: `
+        Para realizar los ejercicios, puedes <b>introducir tus propios intervalos y frecuencias</b> o usar el conjunto de ejemplo.<br>
+        <b>Nota:</b> Los intervalos deben ser consecutivos y sin superposición.
+        `,
+        showInput: true,
+        chartType: "histogram"
+      },
+      // 2: Media
+      {
+        title: "Paso 2: ¿Qué es la <u>media</u> para datos agrupados?",
+        description: `
+        <div class="concept-ref">
+          <b>Definición adaptada para datos agrupados:</b><br>
+          "La <b>media aritmética</b> para datos agrupados se calcula multiplicando la marca de clase (punto medio del intervalo) por su frecuencia, sumando estos productos y dividiendo entre la suma total de frecuencias."
+        </div>
+        <b>Utilidad:</b> La media nos da una idea del valor promedio cuando solo tenemos los datos agrupados en intervalos.<br>
+        <b>Ejemplo:</b> La media de ingresos cuando solo tenemos rangos salariales.
+        <br><br>
+        <b>¡Vamos a calcularla y a observarla en la gráfica!</b>
+        `,
+        showInput: false,
+        chartType: "media"
+      },
+      // 3: Explicación paso a paso - Media
+      {
+        title: "Paso 3: Cálculo paso a paso de la media para datos agrupados",
+        description: "",
+        showInput: false,
+        chartType: "media"
+      },
+      // 4: Mediana
+      {
+        title: "Paso 4: ¿Qué es la <u>mediana</u> para datos agrupados?",
+        description: `
+        <div class="concept-ref">
+          <b>Definición adaptada para datos agrupados:</b><br>
+          "La <b>mediana</b> para datos agrupados se encuentra en el intervalo que contiene el valor central. Se calcula mediante interpolación lineal dentro del intervalo mediano."
+        </div>
+        <b>Utilidad:</b> La mediana es especialmente útil para datos agrupados cuando existen intervalos abiertos o distribuciones asimétricas.<br>
+        <b>Ejemplo:</b> Punto medio de ingresos cuando solo tenemos rangos salariales.
+        <br><br>
+        <b>¡Vamos a calcularla y a observarla en la gráfica!</b>
+        `,
+        showInput: false,
+        chartType: "mediana"
+      },
+      // 5: Explicación paso a paso - Mediana
+      {
+        title: "Paso 5: Cálculo paso a paso de la mediana para datos agrupados",
+        description: "",
+        showInput: false,
+        chartType: "mediana"
+      },
+      // 6: Moda
+      {
+        title: "Paso 6: ¿Qué es la <u>moda</u> para datos agrupados?",
+        description: `
+        <div class="concept-ref">
+          <b>Definición adaptada para datos agrupados:</b><br>
+          "La <b>moda</b> para datos agrupados se encuentra en el intervalo con mayor frecuencia (intervalo modal). Se calcula mediante la fórmula de Czuber o King."
+        </div>
+        <b>Utilidad:</b> La moda identifica el intervalo más común cuando trabajamos con datos agrupados.<br>
+        <b>Ejemplo:</b> El rango salarial más frecuente en una empresa.
+        <br><br>
+        <b>¡Vamos a calcularla y a observarla en la gráfica!</b>
+        `,
+        showInput: false,
+        chartType: "moda"
+      },
+      // 7: Explicación paso a paso - Moda
+      {
+        title: "Paso 7: Cálculo paso a paso de la moda para datos agrupados",
+        description: "",
+        showInput: false,
+        chartType: "moda"
+      },
+      // 8: Conclusión
+      {
+        title: "¡Felicidades! Has aprendido media, mediana y moda para datos agrupados",
+        description: `
+        <b>Ahora ya sabes:</b>
+        <ul>
+          <li>Cómo calcular la media, la mediana y la moda para datos agrupados.</li>
+          <li>Las fórmulas específicas para cada medida con intervalos.</li>
+          <li>Cómo interpretar estos resultados en contextos reales.</li>
+        </ul>
+        <b>Recuerda:</b> Cada medida da información diferente sobre la distribución de los datos agrupados.<br>
+        <div class="concept-ref">
+          "El análisis de datos agrupados es esencial cuando no tenemos acceso a los datos originales."<br>
+          <i>- Adaptado de David Anderson</i>
+        </div>
+        <b>¡Sigue practicando con diferentes conjuntos de datos!</b>
+        `,
+        showInput: false,
+        chartType: null
+      }
+    ];
+
+    // --- Renderizado de Pasos ---
+    function renderStep() {
+      const step = steps[currentStep];
+      const container = document.getElementById('step-content');
+      let html = `<div class="step-title">${step.title}</div>`;
+      if (step.description) html += `<div class="step-description">${step.description}</div>`;
+      
+      if (step.showInput) {
+        html += `
+        <div class="input-data-section">
+          <p><b>Ingresa tus datos agrupados:</b></p>
+          <div id="data-inputs">
+            <table>
+              <thead>
+                <tr>
+                  <th>Intervalo inferior</th>
+                  <th>Intervalo superior</th>
+                  <th>Frecuencia</th>
+                </tr>
+              </thead>
+              <tbody id="interval-rows">
+                ${groupedData.map(interval => `
+                  <tr>
+                    <td><input type="number" class="interval-lower" value="${interval.lower}" step="0.1"></td>
+                    <td><input type="number" class="interval-upper" value="${interval.upper}" step="0.1"></td>
+                    <td><input type="number" class="interval-freq" value="${interval.frequency}" min="0"></td>
+                  </tr>
+                `).join('')}
+              </tbody>
+            </table>
+            <div style="margin-top: 1rem;">
+              <button type="button" onclick="addInterval()">Añadir intervalo</button>
+              <button type="button" onclick="removeInterval()">Eliminar último</button>
+              <button type="button" onclick="actualizarDatosAgrupados()">Cargar datos</button>
+            </div>
+            <div id="input-error" style="color:#e74c3c;font-size:0.98em;"></div>
+          </div>
+        </div>
+        `;
+      }
+      
+      if (step.chartType) {
+        html += `<div id="chart-container"><canvas id="chart-canvas" width="600" height="300"></canvas></div>`;
+      }
+      
+      container.innerHTML = html;
+
+      // Mostrar explicación paso a paso en pasos de cálculo
+      if (currentStep === 3) renderExplicacionMedia();
+      if (currentStep === 5) renderExplicacionMediana();
+      if (currentStep === 7) renderExplicacionModa();
+
+      // Botones
+      document.getElementById('prevBtn').disabled = currentStep === 0;
+      document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+
+      // Dibujar gráfica
+      if (step.chartType) {
+        setTimeout(() => drawChart(step.chartType), 100);
+      }
+    }
+
+    // --- Entrada de Datos Agrupados ---
+    function addInterval() {
+      const lastInterval = groupedData[groupedData.length - 1];
+      const newUpper = lastInterval ? lastInterval.upper + 10 : 10;
+      groupedData.push({
+        lower: newUpper,
+        upper: newUpper + 10,
+        frequency: 0
+      });
+      renderStep();
+    }
+
+    function removeInterval() {
+      if (groupedData.length > 1) {
+        groupedData.pop();
+        renderStep();
+      }
+    }
+
+    function actualizarDatosAgrupados() {
+      const err = document.getElementById('input-error');
+      const newData = [];
+      const lowerInputs = document.getElementsByClassName('interval-lower');
+      const upperInputs = document.getElementsByClassName('interval-upper');
+      const freqInputs = document.getElementsByClassName('interval-freq');
+      
+      // Validación de intervalos
+      for (let i = 0; i < lowerInputs.length; i++) {
+        const lower = parseFloat(lowerInputs[i].value);
+        const upper = parseFloat(upperInputs[i].value);
+        const freq = parseInt(freqInputs[i].value);
+        
+        if (isNaN(lower) || isNaN(upper) || isNaN(freq)) {
+          err.textContent = 'Todos los campos deben ser números válidos.';
+          return;
+        }
+        
+        if (lower >= upper) {
+          err.textContent = 'El límite inferior debe ser menor que el superior.';
+          return;
+        }
+        
+        if (freq < 0) {
+          err.textContent = 'La frecuencia no puede ser negativa.';
+          return;
+        }
+        
+        // Validar que los intervalos sean consecutivos
+        if (i > 0 && lower !== newData[i-1].upper) {
+          err.textContent = 'Los intervalos deben ser consecutivos (el límite superior de uno debe coincidir con el inferior del siguiente).';
+          return;
+        }
+        
+        newData.push({ lower, upper, frequency: freq });
+      }
+      
+      if (newData.reduce((sum, interval) => sum + interval.frequency, 0) === 0) {
+        err.textContent = 'La suma total de frecuencias debe ser mayor que cero.';
+        return;
+      }
+      
+      err.textContent = '';
+      groupedData = newData;
+      renderStep();
+    }
+
+    // --- Navegación ---
+    function nextStep() {
+      if (currentStep < steps.length - 1) {
+        currentStep++;
+        renderStep();
+      }
+    }
+    
+    function prevStep() {
+      if (currentStep > 0) {
+        currentStep--;
+        renderStep();
+      }
+    }
+
+    // --- Cálculos para datos agrupados ---
+    function calcularMarcaClase(interval) {
+      return (interval.lower + interval.upper) / 2;
+    }
+
+    function calcularMediaAgrupada() {
+      const totalFreq = groupedData.reduce((sum, interval) => sum + interval.frequency, 0);
+      if (totalFreq === 0) return 0;
+      
+      const sumProducts = groupedData.reduce((sum, interval) => {
+        return sum + (calcularMarcaClase(interval) * interval.frequency);
+      }, 0);
+      
+      return sumProducts / totalFreq;
+    }
+
+    function calcularMedianaAgrupada() {
+      const totalFreq = groupedData.reduce((sum, interval) => sum + interval.frequency, 0);
+      if (totalFreq === 0) return 0;
+      
+      const medianPos = totalFreq / 2;
+      let cumulativeFreq = 0;
+      let medianInterval = null;
+      let prevCumulative = 0;
+      
+      // Encontrar el intervalo mediano
+      for (const interval of groupedData) {
+        cumulativeFreq += interval.frequency;
+        if (cumulativeFreq >= medianPos) {
+          medianInterval = interval;
+          break;
+        }
+        prevCumulative = cumulativeFreq;
+      }
+      
+      if (!medianInterval) return 0;
+      
+      // Fórmula de interpolación para la mediana
+      const L = medianInterval.lower; // Límite inferior del intervalo mediano
+      const F = prevCumulative; // Frecuencia acumulada antes del intervalo mediano
+      const f = medianInterval.frequency; // Frecuencia del intervalo mediano
+      const w = medianInterval.upper - medianInterval.lower; // Amplitud del intervalo
+      
+      return L + ((medianPos - F) / f) * w;
+    }
+
+    function calcularModaAgrupada() {
+      if (groupedData.length === 0) return 0;
+      
+      // Encontrar el intervalo modal (el de mayor frecuencia)
+      let maxFreq = 0;
+      let modalInterval = null;
+      let prevInterval = null;
+      let nextInterval = null;
+      
+      for (let i = 0; i < groupedData.length; i++) {
+        if (groupedData[i].frequency > maxFreq) {
+          maxFreq = groupedData[i].frequency;
+          modalInterval = groupedData[i];
+          prevInterval = i > 0 ? groupedData[i-1] : null;
+          nextInterval = i < groupedData.length - 1 ? groupedData[i+1] : null;
+        }
+      }
+      
+      if (!modalInterval) return 0;
+      
+      // Fórmula de Czuber para la moda
+      const L = modalInterval.lower; // Límite inferior del intervalo modal
+      const d1 = modalInterval.frequency - (prevInterval ? prevInterval.frequency : 0);
+      const d2 = modalInterval.frequency - (nextInterval ? nextInterval.frequency : 0);
+      const w = modalInterval.upper - modalInterval.lower; // Amplitud del intervalo
+      
+      return L + (d1 / (d1 + d2)) * w;
+    }
+
+    // --- Paso a paso para cada cálculo ---
+    function renderExplicacionMedia() {
+      const totalFreq = groupedData.reduce((sum, interval) => sum + interval.frequency, 0);
+      const sumProducts = groupedData.reduce((sum, interval) => {
+        return sum + (calcularMarcaClase(interval) * interval.frequency);
+      }, 0);
+      
+      const html = `
+      <div class="step-description">
+        <b>Tabla de cálculo:</b>
+        <div class="data-table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Intervalo</th>
+                <th>Marca de clase (x)</th>
+                <th>Frecuencia (f)</th>
+                <th>x · f</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${groupedData.map(interval => `
+                <tr>
+                  <td>${interval.lower} - ${interval.upper}</td>
+                  <td>${calcularMarcaClase(interval).toFixed(2)}</td>
+                  <td>${interval.frequency}</td>
+                  <td>${(calcularMarcaClase(interval) * interval.frequency).toFixed(2)}</td>
+                </tr>
+              `).join('')}
+              <tr style="font-weight:bold;">
+                <td>Total</td>
+                <td></td>
+                <td>${totalFreq}</td>
+                <td>${sumProducts.toFixed(2)}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+        <b>Paso 1:</b> Calcular la marca de clase para cada intervalo (promedio de los límites).<br>
+        <b>Paso 2:</b> Multiplicar cada marca de clase por su frecuencia.<br>
+        <b>Paso 3:</b> Sumar todos los productos (x·f).<br>
+        <b>Paso 4:</b> Dividir la suma entre el total de frecuencias.<br><br>
+        <b>Fórmula:</b> Media = (Σ(x·f)) / Σf = ${sumProducts.toFixed(2)} / ${totalFreq} = <span style="color:#2d72d9;font-size:1.2em;font-weight:bold;">${(sumProducts / totalFreq).toFixed(2)}</span>
+      </div>
+      `;
+      document.getElementById('step-content').innerHTML += html;
+    }
+
+    function renderExplicacionMediana() {
+      const totalFreq = groupedData.reduce((sum, interval) => sum + interval.frequency, 0);
+      const medianPos = totalFreq / 2;
+      let cumulativeFreq = 0;
+      let medianInterval = null;
+      let prevCumulative = 0;
+      
+      // Encontrar el intervalo mediano
+      for (const interval of groupedData) {
+        cumulativeFreq += interval.frequency;
+        if (cumulativeFreq >= medianPos) {
+          medianInterval = interval;
+          break;
+        }
+        prevCumulative = cumulativeFreq;
+      }
+      
+      const L = medianInterval.lower;
+      const F = prevCumulative;
+      const f = medianInterval.frequency;
+      const w = medianInterval.upper - medianInterval.lower;
+      const mediana = L + ((medianPos - F) / f) * w;
+      
+      const html = `
+      <div class="step-description">
+        <b>Tabla de frecuencias acumuladas:</b>
+        <div class="data-table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Intervalo</th>
+                <th>Frecuencia (f)</th>
+                <th>Frecuencia acumulada (F)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${groupedData.map((interval, index) => {
+                const acum = groupedData.slice(0, index+1).reduce((sum, i) => sum + i.frequency, 0);
+                return `
+                  <tr ${interval === medianInterval ? 'style="background-color:#e0e7ff;font-weight:bold;"' : ''}>
+                    <td>${interval.lower} - ${interval.upper}</td>
+                    <td>${interval.frequency}</td>
+                    <td>${acum}</td>
+                  </tr>
+                `;
+              }).join('')}
+            </tbody>
+          </table>
+        </div>
+        <b>Paso 1:</b> Calcular la posición de la mediana: n/2 = ${totalFreq}/2 = <b>${medianPos}</b>.<br>
+        <b>Paso 2:</b> Identificar el intervalo que contiene la mediana (donde F ≥ ${medianPos}).<br>
+        <b>Paso 3:</b> Aplicar la fórmula de interpolación:<br><br>
+        Mediana = L + [ (n/2 - F) / f ] · w<br>
+        Donde:<br>
+        - L = Límite inferior del intervalo mediano = <b>${L}</b><br>
+        - n/2 = Posición de la mediana = <b>${medianPos}</b><br>
+        - F = Frecuencia acumulada anterior = <b>${F}</b><br>
+        - f = Frecuencia del intervalo mediano = <b>${f}</b><br>
+        - w = Amplitud del intervalo = <b>${w}</b><br><br>
+        Mediana = ${L} + [ (${medianPos} - ${F}) / ${f} ] · ${w} = <span style="color:#2d72d9;font-size:1.2em;font-weight:bold;">${mediana.toFixed(2)}</span>
+      </div>
+      `;
+      document.getElementById('step-content').innerHTML += html;
+    }
+
+    function renderExplicacionModa() {
+      // Encontrar el intervalo modal
+      let maxFreq = 0;
+      let modalInterval = null;
+      let prevInterval = null;
+      let nextInterval = null;
+      
+      for (let i = 0; i < groupedData.length; i++) {
+        if (groupedData[i].frequency > maxFreq) {
+          maxFreq = groupedData[i].frequency;
+          modalInterval = groupedData[i];
+          prevInterval = i > 0 ? groupedData[i-1] : null;
+          nextInterval = i < groupedData.length - 1 ? groupedData[i+1] : null;
+        }
+      }
+      
+      const L = modalInterval.lower;
+      const d1 = modalInterval.frequency - (prevInterval ? prevInterval.frequency : 0);
+      const d2 = modalInterval.frequency - (nextInterval ? nextInterval.frequency : 0);
+      const w = modalInterval.upper - modalInterval.lower;
+      const moda = L + (d1 / (d1 + d2)) * w;
+      
+      const html = `
+      <div class="step-description">
+        <b>Tabla de frecuencias:</b>
+        <div class="data-table-container">
+          <table>
+            <thead>
+              <tr>
+                <th>Intervalo</th>
+                <th>Frecuencia (f)</th>
+              </tr>
+            </thead>
+            <tbody>
+              ${groupedData.map(interval => `
+                <tr ${interval === modalInterval ? 'style="background-color:#e0e7ff;font-weight:bold;"' : ''}>
+                  <td>${interval.lower} - ${interval.upper}</td>
+                  <td>${interval.frequency}</td>
+                </tr>
+              `).join('')}
+            </tbody>
+          </table>
+        </div>
+        <b>Paso 1:</b> Identificar el intervalo modal (el de mayor frecuencia).<br>
+        <b>Paso 2:</b> Aplicar la fórmula de Czuber:<br><br>
+        Moda = L + [ d1 / (d1 + d2) ] · w<br>
+        Donde:<br>
+        - L = Límite inferior del intervalo modal = <b>${L}</b><br>
+        - d1 = f<sub>modal</sub> - f<sub>anterior</sub> = ${modalInterval.frequency} - ${prevInterval ? prevInterval.frequency : 0} = <b>${d1}</b><br>
+        - d2 = f<sub>modal</sub> - f<sub>siguiente</sub> = ${modalInterval.frequency} - ${nextInterval ? nextInterval.frequency : 0} = <b>${d2}</b><br>
+        - w = Amplitud del intervalo = <b>${w}</b><br><br>
+        Moda = ${L} + [ ${d1} / (${d1} + ${d2}) ] · ${w} = <span style="color:#2d72d9;font-size:1.2em;font-weight:bold;">${moda.toFixed(2)}</span>
+      </div>
+      `;
+      document.getElementById('step-content').innerHTML += html;
+    }
+
+    // --- Dibujo de Gráficas ---
+    function drawChart(type) {
+      const canvas = document.getElementById('chart-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const width = canvas.width, height = canvas.height;
+      
+      // Escalado
+      const maxFreq = Math.max(...groupedData.map(i => i.frequency), 1);
+      const minX = groupedData[0].lower;
+      const maxX = groupedData[groupedData.length - 1].upper;
+      const stepY = (height - 60) / maxFreq;
+      const stepX = (width - 60) / (groupedData.length);
+      
+      // Dibujo de barras (histograma)
+      ctx.fillStyle = "#8bbbf7";
+      groupedData.forEach((interval, i) => {
+        const barH = interval.frequency * stepY;
+        const barW = (width - 60) / groupedData.length;
+        ctx.fillRect(40 + i * barW, height - barH - 20, barW - 2, barH);
+        
+        // Etiquetas de intervalo
+        ctx.fillStyle = "#2056b3";
+        ctx.font = "12px Segoe UI";
+        ctx.fillText(`${interval.lower}-${interval.upper}`, 40 + i * barW + barW/4, height - 5);
+        
+        // Etiquetas de frecuencia
+        if (interval.frequency > 0) {
+          ctx.fillStyle = "#2056b3";
+          ctx.font = "bold 14px Segoe UI";
+          ctx.fillText(interval.frequency, 40 + i * barW + barW/2 - 5, height - barH - 25);
+        }
+      });
+      
+      // Ejes
+      ctx.strokeStyle = "#2056b3";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(30, height - 20);
+      ctx.lineTo(width - 10, height - 20);
+      ctx.moveTo(40, height - 20);
+      ctx.lineTo(40, 20);
+      ctx.stroke();
+      
+      // Etiquetas ejes
+      ctx.fillStyle = "#2056b3";
+      ctx.font = "bold 14px Segoe UI";
+      ctx.fillText("Frecuencia", 10, height/2);
+      ctx.fillText("Intervalos", width/2, height - 5);
+      
+      // Destacar medida
+      const media = calcularMediaAgrupada();
+      const mediana = calcularMedianaAgrupada();
+      const moda = calcularModaAgrupada();
+      
+      if (type === "media") {
+        // Línea de la media
+        const x = 40 + ((media - minX) / (maxX - minX)) * (width - 60);
+        if (x >= 40 && x <= width - 20) {
+          ctx.strokeStyle = "#e67e22";
+          ctx.beginPath();
+          ctx.moveTo(x, height - 20);
+          ctx.lineTo(x, 20);
+          ctx.stroke();
+          ctx.fillStyle = "#e67e22";
+          ctx.font = "bold 16px Segoe UI";
+          ctx.fillText("Media: " + media.toFixed(2), x + 5, 30);
+        }
+      }
+      
+      if (type === "mediana") {
+        // Línea de la mediana
+        const x = 40 + ((mediana - minX) / (maxX - minX)) * (width - 60);
+        if (x >= 40 && x <= width - 20) {
+          ctx.strokeStyle = "#16a085";
+          ctx.beginPath();
+          ctx.moveTo(x, height - 20);
+          ctx.lineTo(x, 20);
+          ctx.stroke();
+          ctx.fillStyle = "#16a085";
+          ctx.font = "bold 16px Segoe UI";
+          ctx.fillText("Mediana: " + mediana.toFixed(2), x + 5, 30);
+        }
+      }
+      
+      if (type === "moda") {
+        // Línea de la moda
+        const x = 40 + ((moda - minX) / (maxX - minX)) * (width - 60);
+        if (x >= 40 && x <= width - 20) {
+          ctx.strokeStyle = "#c0392b";
+          ctx.beginPath();
+          ctx.moveTo(x, height - 20);
+          ctx.lineTo(x, 20);
+          ctx.stroke();
+          ctx.fillStyle = "#c0392b";
+          ctx.font = "bold 16px Segoe UI";
+          ctx.fillText("Moda: " + moda.toFixed(2), x + 5, 30);
+        }
+      }
+    }
+
+    // --- Inicialización ---
+    window.onload = renderStep;
+  </script>
+</body>
+</html>

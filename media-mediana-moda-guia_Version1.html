@@ -1,0 +1,497 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Guía Didáctica: Media, Mediana y Moda</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background: #f7f7fa;
+      min-height: 100vh;
+      color: #234;
+    }
+    header {
+      background: #2d72d9;
+      color: #fff;
+      text-align: center;
+      padding: 2rem 1rem 1.2rem 1rem;
+      font-size: 2rem;
+      letter-spacing: 1px;
+    }
+    .main-container {
+      max-width: 850px;
+      margin: 2rem auto;
+      background: #fff;
+      border-radius: 1.5rem;
+      box-shadow: 0 6px 24px rgba(44,62,80,0.14);
+      padding: 2rem 1.5rem;
+      min-height: 500px;
+      position: relative;
+      overflow: hidden;
+    }
+    .step-title {
+      color: #2056b3;
+      font-size: 1.35rem;
+      margin-bottom: 0.8rem;
+      font-weight: bold;
+    }
+    .step-description {
+      font-size: 1.07rem;
+      margin-bottom: 1.2rem;
+      color: #234;
+      line-height: 1.6;
+    }
+    .concept-ref {
+      background: #e0e7ff;
+      border-left: 4px solid #2d72d9;
+      padding: 0.7rem 1.2rem;
+      border-radius: 0.8rem;
+      color: #2056b3;
+      margin-bottom: 1.1rem;
+      font-size: 1.04rem;
+      font-style: italic;
+    }
+    .nav-controls {
+      margin-top: 2.5rem;
+      display: flex;
+      justify-content: space-between;
+    }
+    .nav-btn {
+      background: #2d72d9;
+      color: #fff;
+      border: none;
+      border-radius: 0.7rem;
+      padding: 0.8rem 2.1rem;
+      font-size: 1rem;
+      cursor: pointer;
+      transition: background 0.2s, box-shadow 0.2s;
+      font-weight: bold;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.07);
+    }
+    .nav-btn:disabled {
+      background: #b6cffb;
+      cursor: not-allowed;
+    }
+    .nav-btn:hover:not(:disabled) {
+      background: #2056b3;
+    }
+    .input-data-section {
+      margin: 1.1rem 0 1.9rem 0;
+      padding: 1rem 1.2rem;
+      background: #f0f4fa;
+      border-radius: 0.7rem;
+      box-shadow: 0 2px 8px rgba(44,62,80,0.03);
+      color: #2056b3;
+    }
+    .input-data-section label {
+      font-weight: bold;
+      color: #2056b3;
+    }
+    .input-data-section input {
+      margin-left: 0.7rem;
+      padding: 0.3rem 0.7rem;
+      border-radius: 0.3rem;
+      border: 1px solid #b6cffb;
+      font-size: 1em;
+    }
+    #chart-container {
+      margin: 2rem 0 1rem 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 280px;
+      background: #f7f7fa;
+      border-radius: 1rem;
+      border: 1px solid #e0e7ff;
+      box-shadow: 0 1px 8px rgba(44,62,80,0.06);
+    }
+    canvas {
+      background: #fff;
+      border-radius: 1rem;
+      margin: 0 auto;
+      display: block;
+    }
+    .footer-credit {
+      text-align: center;
+      color: #2056b3;
+      font-size: 1.07rem;
+      margin-top: 2.5rem;
+      margin-bottom: 0.8rem;
+      font-style: italic;
+      line-height: 1.35;
+      opacity: 0.88;
+    }
+    @media (max-width: 600px) {
+      header { font-size: 1.1rem; padding: 1.2rem 0.5rem; }
+      .main-container { padding: 0.7rem 0.2rem; }
+      .step-title { font-size: 1.1rem;}
+      #chart-container { min-height: 180px;}
+    }
+  </style>
+</head>
+<body>
+  <header>
+    Guía Didáctica Interactiva: Media, Mediana y Moda
+  </header>
+  <div class="main-container">
+    <div id="step-content"></div>
+    <div class="nav-controls">
+      <button class="nav-btn" id="prevBtn" onclick="prevStep()">Anterior</button>
+      <button class="nav-btn" id="nextBtn" onclick="nextStep()">Siguiente</button>
+    </div>
+  </div>
+  <div class="footer-credit">
+    Basado en las enseñanzas de David Anderson.<br>
+    Elaborado para aprendizaje interactivo de estadística básica.
+  </div>
+  <script>
+    // --- Datos y Estado ---
+    let currentStep = 0;
+    let customData = [4, 6, 7, 8, 8, 9, 10, 10, 15, 18]; // default
+    // --- Componentes de cada paso ---
+    const steps = [
+      // 0: Introducción
+      {
+        title: "Bienvenida: ¿Qué aprenderás?",
+        description: `
+        <b>¡Bienvenido/a!</b> En esta guía didáctica interactiva vas a aprender, paso a paso, cómo calcular y comprender la <b>media</b>, la <b>mediana</b> y la <b>moda</b>.<br><br>
+        Para cada medida:
+        <ul>
+          <li>Aprenderás el concepto según <b>David R. Anderson</b> y su utilidad en la vida real.</li>
+          <li>Descubrirás cómo calcularla paso a paso.</li>
+          <li>Visualizarás cómo se observa en una gráfica.</li>
+        </ul>
+        <b>¡Comencemos!</b> Haz clic en "Siguiente".
+        `,
+        showInput: false,
+        chartType: null
+      },
+      // 1: Datos y entrada
+      {
+        title: "Paso 1: Introduce tus datos o usa el ejemplo",
+        description: `
+        Para realizar los ejercicios, puedes <b>introducir una lista de números</b> (separados por comas) o usar el conjunto de ejemplo.<br>
+        Ejemplo: <b>4, 6, 7, 8, 8, 9, 10, 10, 15, 18</b>
+        `,
+        showInput: true,
+        chartType: "bar"
+      },
+      // 2: Media
+      {
+        title: "Paso 2: ¿Qué es la <u>media</u>?",
+        description: `
+        <div class="concept-ref">
+          <b>Definición según David Anderson:</b><br>
+          "La <b>media aritmética</b> es la suma de todos los valores de un conjunto de datos, dividida entre el número de valores. Es la medida más utilizada para describir el centro de una distribución numérica."
+        </div>
+        <b>Utilidad:</b> La media nos da una idea del valor promedio, útil para comparar, analizar tendencias y tomar decisiones.<br>
+        <b>Ejemplo:</b> La media de las calificaciones puede indicar el desempeño promedio de un grupo.
+        <br><br>
+        <b>¡Vamos a calcularla y a observarla en la gráfica!</b>
+        `,
+        showInput: false,
+        chartType: "media"
+      },
+      // 3: Explicación paso a paso - Media
+      {
+        title: "Paso 3: Cálculo paso a paso de la media",
+        description: "",
+        showInput: false,
+        chartType: "media"
+      },
+      // 4: Mediana
+      {
+        title: "Paso 4: ¿Qué es la <u>mediana</u>?",
+        description: `
+        <div class="concept-ref">
+          <b>Definición según David Anderson:</b><br>
+          "La <b>mediana</b> es el valor que ocupa la posición central en un conjunto de datos ordenados. Si hay un número par de datos, la mediana es el promedio de los dos valores centrales."
+        </div>
+        <b>Utilidad:</b> La mediana es útil cuando existen valores atípicos, ya que indica el punto medio real de los datos.<br>
+        <b>Ejemplo:</b> Es útil para analizar ingresos, ya que la media puede verse afectada por valores extremos.
+        <br><br>
+        <b>¡Vamos a calcularla y a observarla en la gráfica!</b>
+        `,
+        showInput: false,
+        chartType: "mediana"
+      },
+      // 5: Explicación paso a paso - Mediana
+      {
+        title: "Paso 5: Cálculo paso a paso de la mediana",
+        description: "",
+        showInput: false,
+        chartType: "mediana"
+      },
+      // 6: Moda
+      {
+        title: "Paso 6: ¿Qué es la <u>moda</u>?",
+        description: `
+        <div class="concept-ref">
+          <b>Definición según David Anderson:</b><br>
+          "La <b>moda</b> es el valor o los valores que aparecen con mayor frecuencia en un conjunto de datos."
+        </div>
+        <b>Utilidad:</b> La moda es útil para identificar tendencias o valores más comunes, especialmente en datos categóricos o discretos.<br>
+        <b>Ejemplo:</b> La talla de ropa más vendida en una tienda.
+        <br><br>
+        <b>¡Vamos a calcularla y a observarla en la gráfica!</b>
+        `,
+        showInput: false,
+        chartType: "moda"
+      },
+      // 7: Explicación paso a paso - Moda
+      {
+        title: "Paso 7: Cálculo paso a paso de la moda",
+        description: "",
+        showInput: false,
+        chartType: "moda"
+      },
+      // 8: Conclusión
+      {
+        title: "¡Felicidades! Has aprendido media, mediana y moda",
+        description: `
+        <b>Ahora ya sabes:</b>
+        <ul>
+          <li>Cómo calcular la media, la mediana y la moda.</li>
+          <li>Para qué sirve cada una y cuándo es mejor usarla.</li>
+          <li>Cómo se observan en gráficas.</li>
+        </ul>
+        <b>Recuerda:</b> Cada medida da información diferente sobre los datos.<br>
+        <div class="concept-ref">
+          "La estadística es fundamental para tomar mejores decisiones en la vida real."<br>
+          <i>- David Anderson</i>
+        </div>
+        <b>¡Sigue practicando con diferentes datos!</b>
+        `,
+        showInput: false,
+        chartType: null
+      }
+    ];
+
+    // --- Renderizado de Pasos ---
+    function renderStep() {
+      const step = steps[currentStep];
+      const container = document.getElementById('step-content');
+      let html = `<div class="step-title">${step.title}</div>`;
+      if (step.description) html += `<div class="step-description">${step.description}</div>`;
+      if (step.showInput) {
+        html += `
+        <div class="input-data-section">
+          <label for="dataInput">Datos (separados por comas):</label>
+          <input type="text" id="dataInput" size="40" value="${customData.join(', ')}">
+          <button type="button" onclick="actualizarDatos()">Cargar</button>
+          <div id="input-error" style="color:#e74c3c;font-size:0.98em;"></div>
+        </div>
+        `;
+      }
+      if (step.chartType) {
+        html += `<div id="chart-container"><canvas id="chart-canvas" width="600" height="300"></canvas></div>`;
+      }
+      container.innerHTML = html;
+
+      // Mostrar explicación paso a paso en pasos de cálculo
+      if (currentStep === 3) renderExplicacionMedia();
+      if (currentStep === 5) renderExplicacionMediana();
+      if (currentStep === 7) renderExplicacionModa();
+
+      // Botones
+      document.getElementById('prevBtn').disabled = currentStep === 0;
+      document.getElementById('nextBtn').disabled = currentStep === steps.length - 1;
+
+      // Dibujar gráfica
+      if (step.chartType) {
+        setTimeout(() => drawChart(step.chartType), 100);
+      }
+    }
+
+    // --- Entrada de Datos ---
+    function actualizarDatos() {
+      const input = document.getElementById('dataInput').value;
+      const err = document.getElementById('input-error');
+      let arr = input.split(',').map(x => Number(x.trim())).filter(x => !isNaN(x));
+      if (arr.length === 0) {
+        err.textContent = 'Por favor, introduce al menos un número válido.';
+        return;
+      }
+      err.textContent = '';
+      customData = arr;
+      renderStep();
+    }
+
+    // --- Navegación ---
+    function nextStep() {
+      if (currentStep < steps.length - 1) {
+        currentStep++;
+        renderStep();
+      }
+    }
+    function prevStep() {
+      if (currentStep > 0) {
+        currentStep--;
+        renderStep();
+      }
+    }
+
+    // --- Cálculos ---
+    function calcularMedia(arr) {
+      if (!arr.length) return 0;
+      return arr.reduce((a, b) => a + b, 0) / arr.length;
+    }
+    function calcularMediana(arr) {
+      if (!arr.length) return 0;
+      let sorted = arr.slice().sort((a, b) => a - b);
+      let len = sorted.length;
+      let mid = Math.floor(len / 2);
+      return len % 2 === 0 ? (sorted[mid - 1] + sorted[mid]) / 2 : sorted[mid];
+    }
+    function calcularModa(arr) {
+      if (!arr.length) return [];
+      let freq = {};
+      arr.forEach(num => freq[num] = (freq[num] || 0) + 1);
+      let maxFreq = Math.max(...Object.values(freq));
+      return Object.keys(freq)
+        .filter(num => freq[num] === maxFreq)
+        .map(Number);
+    }
+
+    // --- Paso a paso para cada cálculo ---
+    function renderExplicacionMedia() {
+      const arr = customData;
+      const sum = arr.reduce((a, b) => a + b, 0);
+      const n = arr.length;
+      const html = `
+      <div class="step-description">
+        <b>Paso 1:</b> Suma todos los valores:<br>
+        ${arr.join(' + ')} = <b>${sum}</b><br><br>
+        <b>Paso 2:</b> Divide la suma entre el número de datos:<br>
+        <b>${sum} / ${n} = ${(sum / n).toFixed(2)}</b><br><br>
+        <b>La media es:</b> <span style="color:#2d72d9;font-size:1.2em;font-weight:bold;">${(sum / n).toFixed(2)}</span>
+      </div>
+      `;
+      document.getElementById('step-content').innerHTML += html;
+    }
+
+    function renderExplicacionMediana() {
+      const arr = customData.slice().sort((a, b) => a - b);
+      const n = arr.length;
+      let html = `
+      <div class="step-description">
+        <b>Paso 1:</b> Ordena los datos de menor a mayor:<br>
+        [${arr.join(', ')}]<br><br>
+        <b>Paso 2:</b> Encuentra la posición central:<br>
+      `;
+      if (n % 2 === 1) {
+        let pos = Math.floor(n / 2) + 1;
+        html += `Hay <b>${n}</b> datos (impar), la mediana es el dato <b>${pos}</b>: <span style="color:#2d72d9;font-size:1.2em;font-weight:bold;">${arr[pos-1]}</span>`;
+      } else {
+        let pos1 = n / 2, pos2 = pos1 + 1;
+        html += `Hay <b>${n}</b> datos (par), la mediana es el promedio de los datos <b>${pos1}</b> y <b>${pos2}</b>:<br>
+        (<b>${arr[pos1-1]}</b> + <b>${arr[pos2-1]}</b>) / 2 = <span style="color:#2d72d9;font-size:1.2em;font-weight:bold;">${((arr[pos1-1] + arr[pos2-1])/2).toFixed(2)}</span>`;
+      }
+      html += '</div>';
+      document.getElementById('step-content').innerHTML += html;
+    }
+
+    function renderExplicacionModa() {
+      const arr = customData;
+      let freq = {};
+      arr.forEach(num => freq[num] = (freq[num] || 0) + 1);
+      let maxFreq = Math.max(...Object.values(freq));
+      let modas = Object.keys(freq).filter(num => freq[num] === maxFreq).map(Number);
+      let html = `
+      <div class="step-description">
+        <b>Paso 1:</b> Contar la frecuencia de cada valor:<br>
+        <ul>
+          ${Object.keys(freq).map(num => `<li>${num}: ${freq[num]} veces</li>`).join('')}
+        </ul>
+        <b>Paso 2:</b> El/los valor(es) con mayor frecuencia:<br>
+        <b>${modas.join(', ')}</b> (${maxFreq} veces)<br>
+        <b>Moda:</b> <span style="color:#2d72d9;font-size:1.2em;font-weight:bold;">${modas.join(', ')}</span>
+      </div>
+      `;
+      document.getElementById('step-content').innerHTML += html;
+    }
+
+    // --- Dibujo de Gráficas ---
+    function drawChart(type) {
+      const canvas = document.getElementById('chart-canvas');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      const width = canvas.width, height = canvas.height;
+      const arr = customData.slice().sort((a, b) => a - b);
+      // Escalado
+      let max = Math.max(...arr, 10), min = Math.min(...arr, 0);
+      let barWidth = Math.min(50, Math.floor((width - 60) / arr.length));
+      let step = (height - 60) / (max - min + 1);
+
+      // Dibujo de barras
+      for (let i = 0; i < arr.length; i++) {
+        let barH = (arr[i] - min + 1) * step;
+        ctx.fillStyle = "#8bbbf7";
+        ctx.fillRect(40 + i * barWidth, height - barH - 20, barWidth - 8, barH);
+        ctx.fillStyle = "#2056b3";
+        ctx.font = "bold 15px Segoe UI";
+        ctx.fillText(arr[i], 40 + i * barWidth + barWidth / 4, height - 10);
+      }
+
+      // Ejes
+      ctx.strokeStyle = "#2056b3";
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(30, height - 20);
+      ctx.lineTo(width - 10, height - 20);
+      ctx.moveTo(40, height - 20);
+      ctx.lineTo(40, 20);
+      ctx.stroke();
+
+      // Destacar medida
+      let mean = calcularMedia(customData);
+      let median = calcularMediana(customData);
+      let moda = calcularModa(customData);
+
+      if (type === "media") {
+        // Línea de la media
+        let y = height - ((mean - min + 1) * step) - 20;
+        ctx.strokeStyle = "#e67e22";
+        ctx.beginPath();
+        ctx.moveTo(35, y);
+        ctx.lineTo(width - 10, y);
+        ctx.stroke();
+        ctx.fillStyle = "#e67e22";
+        ctx.font = "bold 18px Segoe UI";
+        ctx.fillText("Media: " + mean.toFixed(2), width - 140, y - 7);
+      }
+      if (type === "mediana") {
+        let y = height - ((median - min + 1) * step) - 20;
+        ctx.strokeStyle = "#16a085";
+        ctx.beginPath();
+        ctx.moveTo(35, y);
+        ctx.lineTo(width - 10, y);
+        ctx.stroke();
+        ctx.fillStyle = "#16a085";
+        ctx.font = "bold 18px Segoe UI";
+        ctx.fillText("Mediana: " + median.toFixed(2), width - 160, y - 7);
+      }
+      if (type === "moda") {
+        moda.forEach(m => {
+          let y = height - ((m - min + 1) * step) - 20;
+          ctx.strokeStyle = "#c0392b";
+          ctx.beginPath();
+          ctx.moveTo(35, y);
+          ctx.lineTo(width - 10, y);
+          ctx.stroke();
+          ctx.fillStyle = "#c0392b";
+          ctx.font = "bold 18px Segoe UI";
+          ctx.fillText("Moda: " + m, width - 120, y - 7);
+        });
+      }
+    }
+
+    // --- Inicialización ---
+    window.onload = renderStep;
+  </script>
+</body>
+</html>
