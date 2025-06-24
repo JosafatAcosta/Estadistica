@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cálculo Interactivo de Percentiles</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            background-color: #f5f7fa;
+            color: #333;
+        }
+        .container {
+            max-width: 900px;
+            margin: 0 auto;
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        h1, h2, h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        h1 {
+            text-align: center;
+            color: #9b59b6;
+            margin-bottom: 30px;
+            border-bottom: 3px solid #9b59b6;
+            padding-bottom: 10px;
+        }
+        .concept-box {
+            background: linear-gradient(135deg, #f5eef8 0%, #e8d4f2 100%);
+            padding: 20px;
+            border-radius: 8px;
+            margin-bottom: 30px;
+            border-left: 5px solid #9b59b6;
+        }
+        .method-box {
+            background: white;
+            border-radius: 8px;
+            padding: 20px;
+            margin-bottom: 30px;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+            border-top: 4px solid #9b59b6;
+        }
+        .formula {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-radius: 5px;
+            font-family: "Courier New", monospace;
+            margin: 15px 0;
+            border-left: 4px solid #e74c3c;
+            color: #c0392b;
+            font-weight: bold;
+            overflow-x: auto;
+        }
+        .interactive-area {
+            background-color: #f9f9f9;
+            padding: 20px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 2px dashed #9b59b6;
+        }
+        .chart-container {
+            position: relative;
+            height: 300px;
+            margin: 20px 0;
+        }
+        button {
+            background-color: #9b59b6;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin: 10px 0;
+        }
+        button:hover {
+            background-color: #8e44ad;
+        }
+        input, select {
+            padding: 8px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            margin: 5px 0;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: left;
+        }
+        th {
+            background-color: #9b59b6;
+            color: white;
+        }
+        tr:nth-child(even) {
+            background-color: #f2f2f2;
+        }
+        .percentile-result {
+            font-weight: bold;
+            color: #e74c3c;
+            font-size: 18px;
+            margin: 10px 0;
+        }
+        .data-point {
+            display: inline-block;
+            margin: 5px;
+            padding: 5px 10px;
+            background-color: #9b59b6;
+            color: white;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .highlight {
+            background-color: #e74c3c !important;
+            transform: scale(1.1);
+            transition: all 0.3s;
+        }
+        .percentile-slider {
+            width: 100%;
+            margin: 20px 0;
+        }
+        .percentile-value {
+            font-size: 18px;
+            font-weight: bold;
+            color: #9b59b6;
+            text-align: center;
+            margin: 10px 0;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>📊 Cálculo Interactivo de Percentiles</h1>
+        
+        <div class="concept-box">
+            <h2>¿Qué son los percentiles?</h2>
+            <p>Los <strong>percentiles</strong> son medidas estadísticas que dividen un conjunto de datos ordenados en 100 partes iguales. Indican el valor por debajo del cual se encuentra un porcentaje específico de los datos.</p>
+            
+            <div style="display: flex; justify-content: space-around; margin: 20px 0; flex-wrap: wrap;">
+                <div style="text-align: center; margin: 10px;">
+                    <div style="width: 80px; height: 80px; background: #e74c3c; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; color: white; font-weight: bold;">P₂₅</div>
+                    <p>Percentil 25 (Q₁)</p>
+                </div>
+                <div style="text-align: center; margin: 10px;">
+                    <div style="width: 80px; height: 80px; background: #9b59b6; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; color: white; font-weight: bold;">P₅₀</div>
+                    <p>Percentil 50 (Mediana)</p>
+                </div>
+                <div style="text-align: center; margin: 10px;">
+                    <div style="width: 80px; height: 80px; background: #3498db; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; color: white; font-weight: bold;">P₇₅</div>
+                    <p>Percentil 75 (Q₃)</p>
+                </div>
+                <div style="text-align: center; margin: 10px;">
+                    <div style="width: 80px; height: 80px; background: #2ecc71; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 10px; color: white; font-weight: bold;">P₉₀</div>
+                    <p>Percentil 90</p>
+                </div>
+            </div>
+            
+            <p>Los percentiles son especialmente útiles para:</p>
+            <ul>
+                <li>Comparar resultados individuales con una población</li>
+                <li>Identificar valores atípicos</li>
+                <li>Analizar distribuciones de datos</li>
+            </ul>
+        </div>
+
+        <div class="method-box">
+            <h2>1. Percentiles para Datos NO Agrupados</h2>
+            
+            <div class="interactive-area">
+                <h3>📌 Ejemplo Interactivo</h3>
+                <p>Ingresa tus datos separados por comas:</p>
+                <input type="text" id="inputData" value="3, 7, 8, 5, 12, 14, 21, 13, 18, 22, 25, 16, 10" style="width: 100%;">
+                
+                <div class="percentile-value">Percentil a calcular: <span id="percentileDisplay">50</span> (P₅₀)</div>
+                <input type="range" min="1" max="99" value="50" class="percentile-slider" id="percentileSlider" oninput="updatePercentile()">
+                
+                <button onclick="calculateUngroupedPercentile()">Calcular Percentil</button>
+                
+                <div id="dataVisualization" style="margin: 20px 0; text-align: center;"></div>
+                
+                <div class="chart-container">
+                    <canvas id="percentilePlot"></canvas>
+                </div>
+                
+                <div id="ungroupedResults"></div>
+                
+                <h3>¿Cómo se calcula?</h3>
+                <ol>
+                    <li>Ordenar los datos de menor a mayor</li>
+                    <li>Calcular la posición con: 
+                        <div class="formula">Posición Pₖ = k × (n + 1) / 100</div>
+                        Donde k es el percentil deseado (1-99) y n es el número de datos
+                    </li>
+                    <li>Si la posición no es entera, interpolar entre los valores adyacentes</li>
+                </ol>
+            </div>
+        </div>
+
+        <div class="method-box">
+            <h2>2. Percentiles para Datos Agrupados</h2>
+            
+            <div class="interactive-area">
+                <h3>📊 Simulador de Datos Agrupados</h3>
+                
+                <div class="percentile-value">Percentil a calcular: <span id="groupedPercentileDisplay">50</span> (P₅₀)</div>
+                <input type="range" min="1" max="99" value="50" class="percentile-slider" id="groupedPercentileSlider" oninput="updateGroupedPercentile()">
+                
+                <table id="groupedDataTable">
+                    <tr>
+                        <th>Intervalo</th>
+                        <th>Frecuencia (fᵢ)</th>
+                        <th>Frec. Acumulada (Fᵢ)</th>
+                    </tr>
+                    <tr>
+                        <td><input type="text" class="interval" value="10-20"></td>
+                        <td><input type="number" class="frequency" value="5"></td>
+                        <td class="cumulative">5</td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" class="interval" value="20-30"></td>
+                        <td><input type="number" class="frequency" value="8"></td>
+                        <td class="cumulative">13</td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" class="interval" value="30-40"></td>
+                        <td><input type="number" class="frequency" value="12"></td>
+                        <td class="cumulative">25</td>
+                    </tr>
+                    <tr>
+                        <td><input type="text" class="interval" value="40-50"></td>
+                        <td><input type="number" class="frequency" value="7"></td>
+                        <td class="cumulative">32</td>
+                    </tr>
+                </table>
+                <button onclick="addRow()">➕ Añadir Fila</button>
+                <button onclick="calculateGroupedPercentile()">Calcular Percentil</button>
+                
+                <div id="groupedResults"></div>
+                
+                <h3>Fórmula para datos agrupados:</h3>
+                <div class="formula">
+                    Pₖ = Lᵢ + [(k × n/100 - Fᵢ₋₁)/fᵢ] × A
+                </div>
+                <p>Donde:</p>
+                <ul>
+                    <li>Lᵢ = Límite inferior del intervalo percentílico</li>
+                    <li>n = Total de datos</li>
+                    <li>Fᵢ₋₁ = Frecuencia acumulada anterior al intervalo</li>
+                    <li>fᵢ = Frecuencia del intervalo percentílico</li>
+                    <li>A = Amplitud del intervalo</li>
+                    <li>k = Percentil deseado (1-99)</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentPercentile = 50;
+        let currentGroupedPercentile = 50;
+        let percentileChart = null;
+        
+        function updatePercentile() {
+            currentPercentile = document.getElementById('percentileSlider').value;
+            document.getElementById('percentileDisplay').textContent = currentPercentile;
+        }
+        
+        function updateGroupedPercentile() {
+            currentGroupedPercentile = document.getElementById('groupedPercentileSlider').value;
+            document.getElementById('groupedPercentileDisplay').textContent = currentGroupedPercentile;
+        }
+        
+        // Función para calcular percentiles no agrupados
+        function calculateUngroupedPercentile() {
+            const input = document.getElementById('inputData').value;
+            const data = input.split(',').map(x => parseFloat(x.trim())).filter(x => !isNaN(x));
+            data.sort((a, b) => a - b);
+            
+            const n = data.length;
+            if (n === 0) return;
+            
+            // Calcular percentil
+            const pPos = currentPercentile * (n + 1) / 100;
+            const percentileValue = getPercentileValue(data, pPos);
+            
+            // Mostrar resultados
+            document.getElementById('ungroupedResults').innerHTML = `
+                <h3>Resultados para P${currentPercentile}:</h3>
+                <p class="percentile-result">Percentil ${currentPercentile} = ${percentileValue.toFixed(2)}</p>
+                <p>Datos ordenados: [${data.join(', ')}]</p>
+                <p>Posición calculada: ${pPos.toFixed(2)}</p>
+            `;
+            
+            // Visualización de datos
+            let html = '';
+            data.forEach((value, index) => {
+                const pos = index + 1;
+                let highlight = '';
+                if (Math.abs(pos - pPos) < 0.3) highlight = 'highlight';
+                
+                html += `<span class="data-point ${highlight}" title="Posición ${pos}: ${value}">${value}</span>`;
+            });
+            document.getElementById('dataVisualization').innerHTML = html;
+            
+            // Crear gráfico de percentiles
+            createPercentilePlot(data, currentPercentile, percentileValue);
+        }
+        
+        function getPercentileValue(data, pos) {
+            const lowerPos = Math.floor(pos) - 1;
+            const upperPos = Math.ceil(pos) - 1;
+            const fraction = pos - Math.floor(pos);
+            
+            if (lowerPos === upperPos) return data[lowerPos];
+            return data[lowerPos] + fraction * (data[upperPos] - data[lowerPos]);
+        }
+        
+        function createPercentilePlot(data, percentile, percentileValue) {
+            const ctx = document.getElementById('percentilePlot').getContext('2d');
+            
+            if (percentileChart) {
+                percentileChart.destroy();
+            }
+            
+            const min = Math.min(...data);
+            const max = Math.max(...data);
+            
+            // Calcular algunos percentiles importantes para mostrar
+            const p25 = getPercentileValue(data, 25 * (data.length + 1) / 100);
+            const p50 = getPercentileValue(data, 50 * (data.length + 1) / 100);
+            const p75 = getPercentileValue(data, 75 * (data.length + 1) / 100);
+            
+            percentileChart = new Chart(ctx, {
+                type: 'scatter',
+                data: {
+                    datasets: [{
+                        label: 'Datos',
+                        data: data.map((value, index) => ({x: index + 1, y: value})),
+                        backgroundColor: '#9b59b6',
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }, {
+                        label: `P${percentile}`,
+                        data: [{x: percentile * (data.length + 1) / 100, y: percentileValue}],
+                        backgroundColor: '#e74c3c',
+                        pointRadius: 8,
+                        pointHoverRadius: 10
+                    }, {
+                        label: 'P25, P50, P75',
+                        data: [
+                            {x: 25 * (data.length + 1) / 100, y: p25},
+                            {x: 50 * (data.length + 1) / 100, y: p50},
+                            {x: 75 * (data.length + 1) / 100, y: p75}
+                        ],
+                        backgroundColor: '#3498db',
+                        pointRadius: 7,
+                        pointHoverRadius: 9
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        x: {
+                            title: {
+                                display: true,
+                                text: 'Posición ordenada'
+                            },
+                            min: 0,
+                            max: data.length + 1
+                        },
+                        y: {
+                            title: {
+                                display: true,
+                                text: 'Valor'
+                            },
+                            min: min - (max - min) * 0.1,
+                            max: max + (max - min) * 0.1
+                        }
+                    },
+                    plugins: {
+                        title: {
+                            display: true,
+                            text: 'Distribución de datos y percentiles'
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    if (context.datasetIndex === 0) {
+                                        return `Valor: ${context.parsed.y} (Posición ${context.parsed.x})`;
+                                    } else if (context.datasetIndex === 1) {
+                                        return `P${percentile}: ${context.parsed.y}`;
+                                    } else {
+                                        if (context.parsed.y === p25) return 'P25: ' + p25.toFixed(2);
+                                        if (context.parsed.y === p50) return 'P50: ' + p50.toFixed(2);
+                                        if (context.parsed.y === p75) return 'P75: ' + p75.toFixed(2);
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        }
+        
+        // Funciones para datos agrupados
+        function addRow() {
+            const table = document.getElementById('groupedDataTable');
+            const newRow = table.insertRow(-1);
+            
+            newRow.innerHTML = `
+                <td><input type="text" class="interval" value="0-0"></td>
+                <td><input type="number" class="frequency" value="0"></td>
+                <td class="cumulative">0</td>
+            `;
+            
+            // Actualizar eventos
+            document.querySelectorAll('.frequency').forEach(input => {
+                input.oninput = updateCumulative;
+            });
+        }
+        
+        function updateCumulative() {
+            const rows = document.querySelectorAll('#groupedDataTable tr:not(:first-child)');
+            let cumulative = 0;
+            
+            rows.forEach(row => {
+                const freq = parseFloat(row.querySelector('.frequency').value) || 0;
+                cumulative += freq;
+                row.querySelector('.cumulative').textContent = cumulative;
+            });
+        }
+        
+        function calculateGroupedPercentile() {
+            const rows = document.querySelectorAll('#groupedDataTable tr:not(:first-child)');
+            const intervals = [];
+            let total = 0;
+            
+            // Leer datos
+            rows.forEach(row => {
+                const interval = row.querySelector('.interval').value;
+                const freq = parseFloat(row.querySelector('.frequency').value) || 0;
+                const cumFreq = parseFloat(row.querySelector('.cumulative').textContent);
+                
+                const [lower, upper] = interval.split('-').map(x => parseFloat(x.trim()));
+                
+                intervals.push({
+                    lower,
+                    upper,
+                    freq,
+                    cumFreq,
+                    width: upper - lower
+                });
+                
+                total += freq;
+            });
+            
+            if (total === 0) return;
+            
+            // Calcular percentil
+            const percentileValue = calculateGroupedPercentileValue(intervals, total, currentGroupedPercentile);
+            
+            // Mostrar resultados
+            document.getElementById('groupedResults').innerHTML = `
+                <h3>Resultados para P${currentGroupedPercentile}:</h3>
+                <p class="percentile-result">Percentil ${currentGroupedPercentile} = ${percentileValue.toFixed(2)}</p>
+                <p>Total de datos: ${total}</p>
+                <p>Posición calculada: ${currentGroupedPercentile * total / 100}</p>
+            `;
+        }
+        
+        function calculateGroupedPercentileValue(intervals, total, percentile) {
+            const position = percentile * total / 100;
+            let intervalIndex = 0;
+            
+            // Encontrar el intervalo correcto
+            for (let i = 0; i < intervals.length; i++) {
+                if (position <= intervals[i].cumFreq) {
+                    intervalIndex = i;
+                    break;
+                }
+            }
+            
+            const interval = intervals[intervalIndex];
+            const prevCumFreq = intervalIndex > 0 ? intervals[intervalIndex - 1].cumFreq : 0;
+            
+            return interval.lower + (
+                (position - prevCumFreq) / interval.freq
+            ) * interval.width;
+        }
+        
+        // Inicialización
+        document.addEventListener('DOMContentLoaded', function() {
+            document.querySelectorAll('.frequency').forEach(input => {
+                input.oninput = updateCumulative;
+            });
+            
+            updatePercentile();
+            updateGroupedPercentile();
+            calculateUngroupedPercentile();
+            updateCumulative();
+        });
+    </script>
+</body>
+</html>
