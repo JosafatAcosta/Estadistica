@@ -1,0 +1,702 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Guía Interactiva de Distribuciones de Probabilidad</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f5f5f5;
+        }
+        
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 10px;
+        }
+        
+        h2 {
+            color: #2980b9;
+            margin-top: 30px;
+        }
+        
+        .menu {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-bottom: 30px;
+        }
+        
+        .menu button {
+            background-color: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+            font-size: 16px;
+        }
+        
+        .menu button:hover {
+            background-color: #2980b9;
+        }
+        
+        .content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin-bottom: 30px;
+        }
+        
+        .formula {
+            background-color: #f8f9fa;
+            padding: 15px;
+            border-left: 4px solid #3498db;
+            margin: 20px 0;
+            font-family: monospace;
+            overflow-x: auto;
+        }
+        
+        .exercise {
+            background-color: #e8f4fc;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 25px 0;
+        }
+        
+        .exercise h3 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        
+        .step {
+            margin-bottom: 15px;
+        }
+        
+        .hidden {
+            display: none;
+        }
+        
+        .param-input {
+            margin: 15px 0;
+        }
+        
+        .param-input label {
+            display: inline-block;
+            width: 150px;
+            font-weight: bold;
+        }
+        
+        .param-input input {
+            padding: 5px;
+            border: 1px solid #ddd;
+            border-radius: 3px;
+        }
+        
+        .calculate-btn {
+            background-color: #27ae60;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+        
+        .calculate-btn:hover {
+            background-color: #219653;
+        }
+        
+        .result {
+            margin-top: 15px;
+            padding: 10px;
+            background-color: #d5f5e3;
+            border-radius: 5px;
+            font-weight: bold;
+        }
+        
+        .graph {
+            width: 100%;
+            height: 300px;
+            background-color: #f8f9fa;
+            margin: 20px 0;
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-around;
+        }
+        
+        .bar {
+            width: 30px;
+            background-color: #3498db;
+            text-align: center;
+            color: white;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+    <h1>Guía Interactiva de Distribuciones de Probabilidad</h1>
+    
+    <div class="menu">
+        <button onclick="showDistribution('binomial')">Distribución Binomial</button>
+        <button onclick="showDistribution('poisson')">Distribución Poisson</button>
+        <button onclick="showDistribution('geometrico')">Distribución Geométrico</button>
+        <button onclick="showDistribution('hipergeometrico')">Distribución Hipergeométrico</button>
+        <button onclick="showDistribution('binomial-negativo')">Distribución Binomial Negativo</button>
+    </div>
+    
+    <!-- Distribución Binomial -->
+    <div id="binomial" class="content hidden">
+        <h2>Distribución Binomial</h2>
+        
+        <p>La distribución binomial describe el número de éxitos en una secuencia de <strong>n</strong> ensayos independientes, con una probabilidad <strong>p</strong> de éxito en cada ensayo.</p>
+        
+        <h3>Características:</h3>
+        <ul>
+            <li>Número fijo de ensayos (n)</li>
+            <li>Dos resultados posibles en cada ensayo: éxito o fracaso</li>
+            <li>Probabilidad de éxito constante (p)</li>
+            <li>Ensayos independientes</li>
+        </ul>
+        
+        <div class="formula">
+            <strong>Fórmula:</strong> P(X = k) = C(n,k) * p<sup>k</sup> * (1-p)<sup>n-k</sup><br>
+            Donde:<br>
+            - C(n,k) es el coeficiente binomial (combinaciones de n en k)<br>
+            - n: número de ensayos<br>
+            - k: número de éxitos deseados<br>
+            - p: probabilidad de éxito en cada ensayo
+        </div>
+        
+        <div class="exercise">
+            <h3>Ejercicio Práctico</h3>
+            <p>Un jugador de baloncesto tiene un 70% de probabilidad de encestar un tiro libre. Si lanza 10 tiros libres:</p>
+            
+            <div class="step">
+                <strong>Paso 1:</strong> Identificar los parámetros<br>
+                n = 10 (número de ensayos)<br>
+                p = 0.7 (probabilidad de éxito)<br>
+                k = ? (número de éxitos que queremos calcular)
+            </div>
+            
+            <div class="param-input">
+                <label for="binomial-k">Calcular probabilidad para k =</label>
+                <input type="number" id="binomial-k" min="0" max="10" value="7">
+                <button class="calculate-btn" onclick="calculateBinomial()">Calcular</button>
+            </div>
+            
+            <div class="result" id="binomial-result"></div>
+            
+            <div class="graph" id="binomial-graph"></div>
+            
+            <div class="step">
+                <strong>Paso 2:</strong> Aplicar la fórmula<br>
+                P(X = k) = C(10,k) * 0.7<sup>k</sup> * 0.3<sup>10-k</sup>
+            </div>
+            
+            <div class="step">
+                <strong>Paso 3:</strong> Interpretación<br>
+                La probabilidad calculada representa la chance de que el jugador enceste exactamente k tiros de los 10 lanzados.
+            </div>
+        </div>
+    </div>
+    
+    <!-- Distribución Poisson -->
+    <div id="poisson" class="content hidden">
+        <h2>Distribución Poisson</h2>
+        
+        <p>La distribución Poisson modela el número de eventos que ocurren en un intervalo fijo de tiempo o espacio, cuando estos eventos ocurren con una tasa media conocida (λ) e independientemente del tiempo desde el último evento.</p>
+        
+        <h3>Características:</h3>
+        <ul>
+            <li>Eventos independientes</li>
+            <li>Tasa promedio constante (λ)</li>
+            <li>Probabilidad de más de un evento en un intervalo muy pequeño es despreciable</li>
+        </ul>
+        
+        <div class="formula">
+            <strong>Fórmula:</strong> P(X = k) = (e<sup>-λ</sup> * λ<sup>k</sup>) / k!<br>
+            Donde:<br>
+            - λ: tasa promedio de ocurrencia por intervalo<br>
+            - k: número de ocurrencias<br>
+            - e: constante de Euler (~2.71828)
+        </div>
+        
+        <div class="exercise">
+            <h3>Ejercicio Práctico</h3>
+            <p>En un centro de llamadas reciben un promedio de 5 llamadas por hora. ¿Cuál es la probabilidad de que reciban exactamente k llamadas en una hora?</p>
+            
+            <div class="step">
+                <strong>Paso 1:</strong> Identificar los parámetros<br>
+                λ = 5 (tasa promedio de llamadas por hora)<br>
+                k = ? (número de llamadas que queremos calcular)
+            </div>
+            
+            <div class="param-input">
+                <label for="poisson-k">Calcular probabilidad para k =</label>
+                <input type="number" id="poisson-k" min="0" value="4">
+                <button class="calculate-btn" onclick="calculatePoisson()">Calcular</button>
+            </div>
+            
+            <div class="result" id="poisson-result"></div>
+            
+            <div class="graph" id="poisson-graph"></div>
+            
+            <div class="step">
+                <strong>Paso 2:</strong> Aplicar la fórmula<br>
+                P(X = k) = (e<sup>-5</sup> * 5<sup>k</sup>) / k!
+            </div>
+            
+            <div class="step">
+                <strong>Paso 3:</strong> Interpretación<br>
+                La probabilidad calculada representa la chance de recibir exactamente k llamadas en una hora dada.
+            </div>
+        </div>
+    </div>
+    
+    <!-- Distribución Geométrica -->
+    <div id="geometrico" class="content hidden">
+        <h2>Distribución Geométrica</h2>
+        
+        <p>La distribución geométrica describe el número de ensayos necesarios hasta obtener el primer éxito en una serie de ensayos independientes con probabilidad de éxito p.</p>
+        
+        <h3>Características:</h3>
+        <ul>
+            <li>Número de ensayos hasta el primer éxito</li>
+            <li>Probabilidad de éxito constante (p)</li>
+            <li>Ensayos independientes</li>
+        </ul>
+        
+        <div class="formula">
+            <strong>Fórmula:</strong> P(X = k) = (1-p)<sup>k-1</sup> * p<br>
+            Donde:<br>
+            - k: número de ensayos hasta el primer éxito (incluyendo el éxito)<br>
+            - p: probabilidad de éxito en cada ensayo
+        </div>
+        
+        <div class="exercise">
+            <h3>Ejercicio Práctico</h3>
+            <p>Un pescador tiene un 20% de probabilidad de atrapar un pez cada vez que lanza su caña. ¿Cuál es la probabilidad de que atrape su primer pez en el lanzamiento k?</p>
+            
+            <div class="step">
+                <strong>Paso 1:</strong> Identificar los parámetros<br>
+                p = 0.2 (probabilidad de éxito)<br>
+                k = ? (número de lanzamientos hasta el primer éxito)
+            </div>
+            
+            <div class="param-input">
+                <label for="geometric-k">Calcular probabilidad para k =</label>
+                <input type="number" id="geometric-k" min="1" value="5">
+                <button class="calculate-btn" onclick="calculateGeometric()">Calcular</button>
+            </div>
+            
+            <div class="result" id="geometric-result"></div>
+            
+            <div class="graph" id="geometric-graph"></div>
+            
+            <div class="step">
+                <strong>Paso 2:</strong> Aplicar la fórmula<br>
+                P(X = k) = 0.8<sup>k-1</sup> * 0.2
+            </div>
+            
+            <div class="step">
+                <strong>Paso 3:</strong> Interpretación<br>
+                La probabilidad calculada representa la chance de que el pescador atrape su primer pez exactamente en el k-ésimo lanzamiento.
+            </div>
+        </div>
+    </div>
+    
+    <!-- Distribución Hipergeométrica -->
+    <div id="hipergeometrico" class="content hidden">
+        <h2>Distribución Hipergeométrica</h2>
+        
+        <p>La distribución hipergeométrica describe la probabilidad de obtener k éxitos en n extracciones sin reemplazo de una población finita que contiene N elementos, de los cuales K son éxitos.</p>
+        
+        <h3>Características:</h3>
+        <ul>
+            <li>Población finita</li>
+            <li>Muestreo sin reemplazo</li>
+            <li>Probabilidad cambia en cada extracción</li>
+        </ul>
+        
+        <div class="formula">
+            <strong>Fórmula:</strong> P(X = k) = [C(K,k) * C(N-K, n-k)] / C(N,n)<br>
+            Donde:<br>
+            - N: tamaño de la población<br>
+            - K: número de éxitos en la población<br>
+            - n: tamaño de la muestra<br>
+            - k: número de éxitos en la muestra
+        </div>
+        
+        <div class="exercise">
+            <h3>Ejercicio Práctico</h3>
+            <p>En una caja hay 20 bombones, de los cuales 8 son de chocolate negro y 12 son de chocolate con leche. Si se seleccionan 5 bombones al azar sin reemplazo, ¿cuál es la probabilidad de que exactamente k sean de chocolate negro?</p>
+            
+            <div class="step">
+                <strong>Paso 1:</strong> Identificar los parámetros<br>
+                N = 20 (total de bombones)<br>
+                K = 8 (bombones de chocolate negro)<br>
+                n = 5 (muestra)<br>
+                k = ? (éxitos en la muestra)
+            </div>
+            
+            <div class="param-input">
+                <label for="hyper-k">Calcular probabilidad para k =</label>
+                <input type="number" id="hyper-k" min="0" max="5" value="2">
+                <button class="calculate-btn" onclick="calculateHypergeometric()">Calcular</button>
+            </div>
+            
+            <div class="result" id="hyper-result"></div>
+            
+            <div class="graph" id="hyper-graph"></div>
+            
+            <div class="step">
+                <strong>Paso 2:</strong> Aplicar la fórmula<br>
+                P(X = k) = [C(8,k) * C(12,5-k)] / C(20,5)
+            </div>
+            
+            <div class="step">
+                <strong>Paso 3:</strong> Interpretación<br>
+                La probabilidad calculada representa la chance de seleccionar exactamente k bombones de chocolate negro en una muestra de 5.
+            </div>
+        </div>
+    </div>
+    
+    <!-- Distribución Binomial Negativa -->
+    <div id="binomial-negativo" class="content hidden">
+        <h2>Distribución Binomial Negativa</h2>
+        
+        <p>La distribución binomial negativa describe el número de ensayos necesarios para obtener r éxitos en una secuencia de ensayos independientes con probabilidad de éxito p.</p>
+        
+        <h3>Características:</h3>
+        <ul>
+            <li>Número de ensayos hasta r éxitos</li>
+            <li>Probabilidad de éxito constante (p)</li>
+            <li>Ensayos independientes</li>
+        </ul>
+        
+        <div class="formula">
+            <strong>Fórmula:</strong> P(X = k) = C(k-1, r-1) * p<sup>r</sup> * (1-p)<sup>k-r</sup><br>
+            Donde:<br>
+            - k: número total de ensayos (incluyendo los r éxitos)<br>
+            - r: número deseado de éxitos<br>
+            - p: probabilidad de éxito en cada ensayo
+        </div>
+        
+        <div class="exercise">
+            <h3>Ejercicio Práctico</h3>
+            <p>Un vendedor tiene un 30% de probabilidad de hacer una venta en cada visita. ¿Cuál es la probabilidad de que necesite exactamente k visitas para lograr 3 ventas?</p>
+            
+            <div class="step">
+                <strong>Paso 1:</strong> Identificar los parámetros<br>
+                r = 3 (éxitos deseados)<br>
+                p = 0.3 (probabilidad de éxito)<br>
+                k = ? (número total de ensayos)
+            </div>
+            
+            <div class="param-input">
+                <label for="negbin-k">Calcular probabilidad para k =</label>
+                <input type="number" id="negbin-k" min="3" value="5">
+                <button class="calculate-btn" onclick="calculateNegBinomial()">Calcular</button>
+            </div>
+            
+            <div class="result" id="negbin-result"></div>
+            
+            <div class="graph" id="negbin-graph"></div>
+            
+            <div class="step">
+                <strong>Paso 2:</strong> Aplicar la fórmula<br>
+                P(X = k) = C(k-1, 2) * 0.3<sup>3</sup> * 0.7<sup>k-3</sup>
+            </div>
+            
+            <div class="step">
+                <strong>Paso 3:</strong> Interpretación<br>
+                La probabilidad calculada representa la chance de que el vendedor necesite exactamente k visitas para lograr su tercera venta.
+            </div>
+        </div>
+    </div>
+    
+    <script>
+        // Función para mostrar la distribución seleccionada
+        function showDistribution(dist) {
+            // Ocultar todos los contenidos
+            document.querySelectorAll('.content').forEach(el => {
+                el.classList.add('hidden');
+            });
+            
+            // Mostrar el contenido seleccionado
+            document.getElementById(dist).classList.remove('hidden');
+            
+            // Actualizar gráficos al mostrar
+            switch(dist) {
+                case 'binomial':
+                    updateBinomialGraph();
+                    break;
+                case 'poisson':
+                    updatePoissonGraph();
+                    break;
+                case 'geometrico':
+                    updateGeometricGraph();
+                    break;
+                case 'hipergeometrico':
+                    updateHypergeometricGraph();
+                    break;
+                case 'binomial-negativo':
+                    updateNegBinomialGraph();
+                    break;
+            }
+        }
+        
+        // Función para calcular combinaciones (n choose k)
+        function combinations(n, k) {
+            if (k < 0 || k > n) return 0;
+            if (k === 0 || k === n) return 1;
+            if (k > n - k) k = n - k; // Toma ventaja de la simetría
+            let res = 1;
+            for (let i = 1; i <= k; i++) {
+                res = res * (n - k + i) / i;
+            }
+            return res;
+        }
+        
+        // Función factorial
+        function factorial(n) {
+            if (n < 0) return NaN;
+            if (n === 0 || n === 1) return 1;
+            let result = 1;
+            for (let i = 2; i <= n; i++) {
+                result *= i;
+            }
+            return result;
+        }
+        
+        // Distribución Binomial
+        function calculateBinomial() {
+            const n = 10;
+            const p = 0.7;
+            const k = parseInt(document.getElementById('binomial-k').value);
+            
+            const comb = combinations(n, k);
+            const prob = comb * Math.pow(p, k) * Math.pow(1-p, n-k);
+            
+            document.getElementById('binomial-result').innerHTML = 
+                `P(X = ${k}) = C(10,${k}) * 0.7<sup>${k}</sup> * 0.3<sup>${10-k}</sup> = ${prob.toFixed(4)} (${(prob*100).toFixed(2)}%)`;
+            
+            updateBinomialGraph();
+        }
+        
+        function updateBinomialGraph() {
+            const n = 10;
+            const p = 0.7;
+            const graph = document.getElementById('binomial-graph');
+            graph.innerHTML = '';
+            
+            let maxProb = 0;
+            const probs = [];
+            
+            // Calcular todas las probabilidades
+            for (let k = 0; k <= n; k++) {
+                const prob = combinations(n, k) * Math.pow(p, k) * Math.pow(1-p, n-k);
+                probs.push(prob);
+                if (prob > maxProb) maxProb = prob;
+            }
+            
+            // Crear barras del gráfico
+            for (let k = 0; k <= n; k++) {
+                const barHeight = (probs[k] / maxProb) * 100;
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = `${barHeight}%`;
+                bar.title = `P(X=${k}) = ${probs[k].toFixed(4)}`;
+                bar.innerHTML = k;
+                graph.appendChild(bar);
+            }
+        }
+        
+        // Distribución Poisson
+        function calculatePoisson() {
+            const lambda = 5;
+            const k = parseInt(document.getElementById('poisson-k').value);
+            
+            const prob = (Math.exp(-lambda) * Math.pow(lambda, k)) / factorial(k);
+            
+            document.getElementById('poisson-result').innerHTML = 
+                `P(X = ${k}) = (e<sup>-5</sup> * 5<sup>${k}</sup>) / ${k}! = ${prob.toFixed(4)} (${(prob*100).toFixed(2)}%)`;
+            
+            updatePoissonGraph();
+        }
+        
+        function updatePoissonGraph() {
+            const lambda = 5;
+            const graph = document.getElementById('poisson-graph');
+            graph.innerHTML = '';
+            
+            let maxProb = 0;
+            const probs = [];
+            
+            // Calcular probabilidades hasta k=15 (suficiente para lambda=5)
+            for (let k = 0; k <= 15; k++) {
+                const prob = (Math.exp(-lambda) * Math.pow(lambda, k)) / factorial(k);
+                probs.push(prob);
+                if (prob > maxProb) maxProb = prob;
+            }
+            
+            // Crear barras del gráfico
+            for (let k = 0; k <= 15; k++) {
+                const barHeight = (probs[k] / maxProb) * 100;
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = `${barHeight}%`;
+                bar.title = `P(X=${k}) = ${probs[k].toFixed(4)}`;
+                bar.innerHTML = k;
+                graph.appendChild(bar);
+            }
+        }
+        
+        // Distribución Geométrica
+        function calculateGeometric() {
+            const p = 0.2;
+            const k = parseInt(document.getElementById('geometric-k').value);
+            
+            const prob = Math.pow(1-p, k-1) * p;
+            
+            document.getElementById('geometric-result').innerHTML = 
+                `P(X = ${k}) = 0.8<sup>${k-1}</sup> * 0.2 = ${prob.toFixed(4)} (${(prob*100).toFixed(2)}%)`;
+            
+            updateGeometricGraph();
+        }
+        
+        function updateGeometricGraph() {
+            const p = 0.2;
+            const graph = document.getElementById('geometric-graph');
+            graph.innerHTML = '';
+            
+            let maxProb = 0;
+            const probs = [];
+            
+            // Calcular probabilidades hasta k=15 (suficiente para p=0.2)
+            for (let k = 1; k <= 15; k++) {
+                const prob = Math.pow(1-p, k-1) * p;
+                probs.push(prob);
+                if (prob > maxProb) maxProb = prob;
+            }
+            
+            // Crear barras del gráfico
+            for (let k = 1; k <= 15; k++) {
+                const barHeight = (probs[k-1] / maxProb) * 100;
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = `${barHeight}%`;
+                bar.title = `P(X=${k}) = ${probs[k-1].toFixed(4)}`;
+                bar.innerHTML = k;
+                graph.appendChild(bar);
+            }
+        }
+        
+        // Distribución Hipergeométrica
+        function calculateHypergeometric() {
+            const N = 20;
+            const K = 8;
+            const n = 5;
+            const k = parseInt(document.getElementById('hyper-k').value);
+            
+            const numerator = combinations(K, k) * combinations(N-K, n-k);
+            const denominator = combinations(N, n);
+            const prob = numerator / denominator;
+            
+            document.getElementById('hyper-result').innerHTML = 
+                `P(X = ${k}) = [C(8,${k}) * C(12,${5-k})] / C(20,5) = ${prob.toFixed(4)} (${(prob*100).toFixed(2)}%)`;
+            
+            updateHypergeometricGraph();
+        }
+        
+        function updateHypergeometricGraph() {
+            const N = 20;
+            const K = 8;
+            const n = 5;
+            const graph = document.getElementById('hyper-graph');
+            graph.innerHTML = '';
+            
+            let maxProb = 0;
+            const probs = [];
+            
+            // Calcular todas las probabilidades posibles (k puede ser de 0 a min(n, K) = 5)
+            for (let k = 0; k <= 5; k++) {
+                const prob = (combinations(K, k) * combinations(N-K, n-k)) / combinations(N, n);
+                probs.push(prob);
+                if (prob > maxProb) maxProb = prob;
+            }
+            
+            // Crear barras del gráfico
+            for (let k = 0; k <= 5; k++) {
+                const barHeight = (probs[k] / maxProb) * 100;
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = `${barHeight}%`;
+                bar.title = `P(X=${k}) = ${probs[k].toFixed(4)}`;
+                bar.innerHTML = k;
+                graph.appendChild(bar);
+            }
+        }
+        
+        // Distribución Binomial Negativa
+        function calculateNegBinomial() {
+            const r = 3;
+            const p = 0.3;
+            const k = parseInt(document.getElementById('negbin-k').value);
+            
+            const comb = combinations(k-1, r-1);
+            const prob = comb * Math.pow(p, r) * Math.pow(1-p, k-r);
+            
+            document.getElementById('negbin-result').innerHTML = 
+                `P(X = ${k}) = C(${k-1},2) * 0.3<sup>3</sup> * 0.7<sup>${k-3}</sup> = ${prob.toFixed(4)} (${(prob*100).toFixed(2)}%)`;
+            
+            updateNegBinomialGraph();
+        }
+        
+        function updateNegBinomialGraph() {
+            const r = 3;
+            const p = 0.3;
+            const graph = document.getElementById('negbin-graph');
+            graph.innerHTML = '';
+            
+            let maxProb = 0;
+            const probs = [];
+            
+            // Calcular probabilidades hasta k=15 (suficiente para r=3, p=0.3)
+            for (let k = r; k <= 15; k++) {
+                const prob = combinations(k-1, r-1) * Math.pow(p, r) * Math.pow(1-p, k-r);
+                probs.push(prob);
+                if (prob > maxProb) maxProb = prob;
+            }
+            
+            // Crear barras del gráfico
+            for (let k = r; k <= 15; k++) {
+                const barHeight = (probs[k-r] / maxProb) * 100;
+                const bar = document.createElement('div');
+                bar.className = 'bar';
+                bar.style.height = `${barHeight}%`;
+                bar.title = `P(X=${k}) = ${probs[k-r].toFixed(4)}`;
+                bar.innerHTML = k;
+                graph.appendChild(bar);
+            }
+        }
+        
+        // Mostrar la distribución binomial por defecto al cargar
+        window.onload = function() {
+            showDistribution('binomial');
+        };
+    </script>
+</body>
+</html>

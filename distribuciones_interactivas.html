@@ -1,0 +1,506 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Guía Interactiva de Distribuciones Probabilísticas</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        :root {
+            --primary: #5b9bd5;
+            --secondary: #e26b0a;
+            --accent: #f9cb9c;
+            --bg: #f4f6fa;
+            --white: #fff;
+            --green: #70ad47;
+            --red: #c00000;
+        }
+        body {
+            font-family: 'Segoe UI', Arial, sans-serif;
+            margin: 0;
+            background: var(--bg);
+            color: #222;
+        }
+        header {
+            background: linear-gradient(90deg, var(--primary), var(--secondary));
+            color: var(--white);
+            padding: 2rem 1rem 1rem 1rem;
+            text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        h1 {
+            font-size: 2.5rem;
+            margin: 0;
+            letter-spacing: 1px;
+        }
+        nav {
+            display: flex;
+            justify-content: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+            margin: 2rem 0 1rem 0;
+        }
+        .menu-btn {
+            background: var(--primary);
+            color: var(--white);
+            border: none;
+            padding: 1rem 2rem;
+            border-radius: 2rem;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: background 0.3s;
+            box-shadow: 0 2px 4px rgba(91,155,213,0.2);
+        }
+        .menu-btn.active, .menu-btn:hover {
+            background: var(--secondary);
+        }
+        main {
+            max-width: 700px;
+            margin: 0 auto;
+            background: var(--white);
+            border-radius: 1rem;
+            box-shadow: 0 4px 16px rgba(91,155,213,0.08);
+            padding: 2rem 2rem 1.5rem 2rem;
+            min-height: 350px;
+            margin-bottom: 2rem;
+        }
+        .formula {
+            background: var(--accent);
+            color: #222;
+            border-radius: 1rem;
+            padding: 1.2rem;
+            margin: 1.2rem 0;
+            font-family: 'Consolas', monospace;
+            font-size: 1.2rem;
+            overflow-x: auto;
+        }
+        .explicacion {
+            padding: 1rem 1.2rem;
+            background: #eef5f9;
+            border-left: 5px solid var(--primary);
+            margin-bottom: 1.5rem;
+            border-radius: 0 1rem 1rem 0;
+        }
+        .ejercicio {
+            background: #fff9e5;
+            border: 2px solid var(--secondary);
+            border-radius: 1rem;
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+        }
+        .pasos {
+            margin: 1rem 0 0 0;
+            padding-left: 1.2rem;
+        }
+        .resultado {
+            background: var(--green);
+            color: var(--white);
+            padding: 0.7rem 1rem;
+            margin: 0.7rem 0;
+            border-radius: .7rem;
+            font-weight: bold;
+        }
+        .incorrecto {
+            background: var(--red);
+            color: var(--white);
+            padding: 0.7rem 1rem;
+            margin: 0.7rem 0;
+            border-radius: .7rem;
+            font-weight: bold;
+        }
+        .input-step {
+            width: 70px;
+            padding: 0.4rem;
+            font-size: 1rem;
+            margin-left: 0.5rem;
+            margin-bottom: 0.5rem;
+        }
+        .check-btn {
+            background: var(--secondary);
+            color: var(--white);
+            border: none;
+            padding: 0.5rem 1.2rem;
+            border-radius: 1rem;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-left: 0.7rem;
+            margin-bottom: 0.5rem;
+            transition: background 0.3s;
+        }
+        @media (max-width: 800px) {
+            main { padding: 1rem; }
+        }
+        @media (max-width: 600px) {
+            nav { flex-direction: column; gap: 0.5rem; }
+            main { padding: 0.5rem; }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>Distribuciones de Probabilidad - Guía Interactiva</h1>
+        <p>Aprende paso por paso las distribuciones discreta más usadas en estadística</p>
+    </header>
+    <nav>
+        <button class="menu-btn active" onclick="mostrarDistribucion('binomial')">Binomial</button>
+        <button class="menu-btn" onclick="mostrarDistribucion('poisson')">Poisson</button>
+        <button class="menu-btn" onclick="mostrarDistribucion('geometrico')">Geométrica</button>
+        <button class="menu-btn" onclick="mostrarDistribucion('hipergeometrico')">Hipergeométrica</button>
+        <button class="menu-btn" onclick="mostrarDistribucion('binomial_negativo')">Binomial Negativa</button>
+    </nav>
+    <main id="contenido">
+        <!-- El contenido se carga dinámicamente -->
+    </main>
+    <script>
+        // Datos de cada distribución
+        const distribuciones = {
+            "binomial": {
+                nombre: "Distribución Binomial",
+                explicacion: `
+                    <b>¿Qué es?</b> <br>
+                    Modela la cantidad de éxitos en <b>n</b> ensayos independientes, cada uno con probabilidad de éxito <b>p</b>.<br>
+                    <ul>
+                        <li>Los ensayos son independientes.</li>
+                        <li>Cada ensayo tiene solo dos resultados: éxito o fracaso.</li>
+                        <li>La probabilidad de éxito (<b>p</b>) es igual en todos los ensayos.</li>
+                    </ul>
+                `,
+                formula: `
+                    P(X = k) = C(n, k) · p<sup>k</sup> · (1 - p)<sup>n - k</sup>
+                    <br>
+                    <small>
+                        Donde:<br>
+                        C(n, k): combinaciones de n en k = n! / [k! · (n-k)!]<br>
+                        n = número de ensayos<br>
+                        k = número de éxitos deseados<br>
+                        p = probabilidad de éxito<br>
+                    </small>
+                `,
+                ejercicio: {
+                    enunciado: `
+                        Supón que lanzas una moneda 5 veces (<b>n = 5</b>). ¿Cuál es la probabilidad de obtener exactamente 3 caras (<b>k = 3</b>)?<br>
+                        Considera que la moneda es justa (<b>p = 0.5</b>).
+                    `,
+                    pasos: [
+                        {
+                            pregunta: "¿Cuántos ensayos hay (n)?",
+                            respuesta: "5"
+                        },
+                        {
+                            pregunta: "¿Cuántos éxitos queremos (k)?",
+                            respuesta: "3"
+                        },
+                        {
+                            pregunta: "¿Cuál es la probabilidad de éxito (p)?",
+                            respuesta: "0.5"
+                        },
+                        {
+                            pregunta: "Calcula C(n, k) = 5! / [3!·2!]",
+                            respuesta: "10"
+                        },
+                        {
+                            pregunta: "Calcula p^k = 0.5^3",
+                            respuesta: "0.125"
+                        },
+                        {
+                            pregunta: "Calcula (1-p)^(n-k) = 0.5^2",
+                            respuesta: "0.25"
+                        },
+                        {
+                            pregunta: "Multiplica C(n,k) · p^k · (1-p)^(n-k)",
+                            respuesta: "0.3125"
+                        }
+                    ],
+                    resultado: "La probabilidad de obtener exactamente 3 caras es <b>0.3125</b>."
+                }
+            },
+            "poisson": {
+                nombre: "Distribución de Poisson",
+                explicacion: `
+                    <b>¿Qué es?</b><br>
+                    Modela el número de veces que ocurre un evento en un intervalo de tiempo o espacio, <b>cuando los eventos ocurren de manera independiente y con una tasa promedio constante (&lambda;)</b>.
+                    <ul>
+                        <li>Cuenta ocurrencias de eventos raros en intervalos.</li>
+                        <li>Los eventos son independientes entre sí.</li>
+                        <li>La tasa de ocurrencia (&lambda;) es constante.</li>
+                    </ul>
+                `,
+                formula: `
+                    P(X = k) = (&lambda;<sup>k</sup> · e<sup>-&lambda;</sup>) / k!
+                    <br>
+                    <small>
+                        Donde:<br>
+                        &lambda; = tasa media de ocurrencia<br>
+                        k = número de ocurrencias deseadas<br>
+                        e = número de Euler ≈ 2.71828<br>
+                    </small>
+                `,
+                ejercicio: {
+                    enunciado: `
+                        Una central recibe en promedio 4 llamadas por minuto (&lambda; = 4).<br>
+                        ¿Cuál es la probabilidad de recibir exactamente 2 llamadas en un minuto (<b>k = 2</b>)?
+                    `,
+                    pasos: [
+                        {
+                            pregunta: "¿Cuál es el valor de λ (tasa promedio)?",
+                            respuesta: "4"
+                        },
+                        {
+                            pregunta: "¿Cuántas llamadas queremos (k)?",
+                            respuesta: "2"
+                        },
+                        {
+                            pregunta: "Calcula λ^k = 4^2",
+                            respuesta: "16"
+                        },
+                        {
+                            pregunta: "Calcula e^-λ = e^-4 ≈ 0.0183",
+                            respuesta: "0.0183"
+                        },
+                        {
+                            pregunta: "Calcula k! = 2! = 2",
+                            respuesta: "2"
+                        },
+                        {
+                            pregunta: "Calcula (λ^k * e^-λ) / k! = (16 * 0.0183) / 2",
+                            respuesta: "0.1464"
+                        }
+                    ],
+                    resultado: "La probabilidad de recibir exactamente 2 llamadas es <b>0.1464</b>."
+                }
+            },
+            "geometrico": {
+                nombre: "Distribución Geométrica",
+                explicacion: `
+                    <b>¿Qué es?</b><br>
+                    Modela la probabilidad de que el primer éxito ocurra en el <b>ensayo número k</b>.<br>
+                    <ul>
+                        <li>Ensayos independientes.</li>
+                        <li>Cada ensayo tiene probabilidad de éxito p.</li>
+                        <li>Se cuenta el número de fracasos antes del primer éxito.</li>
+                    </ul>
+                `,
+                formula: `
+                    P(X = k) = (1 - p)<sup>k-1</sup> · p
+                    <br>
+                    <small>
+                        Donde:<br>
+                        k = número de ensayo donde ocurre el primer éxito<br>
+                        p = probabilidad de éxito<br>
+                    </small>
+                `,
+                ejercicio: {
+                    enunciado: `
+                        La probabilidad de acertar una pregunta es de 0.3 (<b>p = 0.3</b>).<br>
+                        ¿Cuál es la probabilidad de acertar por primera vez en el tercer intento (<b>k = 3</b>)?
+                    `,
+                    pasos: [
+                        {
+                            pregunta: "¿Cuál es la probabilidad de éxito (p)?",
+                            respuesta: "0.3"
+                        },
+                        {
+                            pregunta: "¿En qué intento queremos el primer éxito (k)?",
+                            respuesta: "3"
+                        },
+                        {
+                            pregunta: "Calcula (1-p)^(k-1) = (1-0.3)^(3-1) = 0.7^2",
+                            respuesta: "0.49"
+                        },
+                        {
+                            pregunta: "Multiplica por p: 0.49 * 0.3",
+                            respuesta: "0.147"
+                        }
+                    ],
+                    resultado: "La probabilidad de acertar por primera vez en el tercer intento es <b>0.147</b>."
+                }
+            },
+            "hipergeometrico": {
+                nombre: "Distribución Hipergeométrica",
+                explicacion: `
+                    <b>¿Qué es?</b><br>
+                    Modela la probabilidad de obtener <b>k éxitos</b> en <b>n extracciones</b> sin reposición de una población de tamaño <b>N</b>, con <b>K</b> elementos exitosos.<br>
+                    <ul>
+                        <li>Las extracciones son sin reposición.</li>
+                        <li>La probabilidad de éxito cambia en cada extracción.</li>
+                    </ul>
+                `,
+                formula: `
+                    P(X = k) = [C(K, k) · C(N-K, n-k)] / C(N, n)
+                    <br>
+                    <small>
+                        Donde:<br>
+                        N = tamaño total de la población<br>
+                        K = número total de éxitos en la población<br>
+                        n = número de extracciones<br>
+                        k = número de éxitos deseados<br>
+                        C(a, b) = combinaciones de a en b<br>
+                    </small>
+                `,
+                ejercicio: {
+                    enunciado: `
+                        En una caja hay 10 bolas, 4 rojas y 6 blancas (N=10, K=4).<br>
+                        Si tomas 3 bolas sin reemplazo (n=3), ¿cuál es la probabilidad de sacar exactamente 2 rojas (k=2)?
+                    `,
+                    pasos: [
+                        {
+                            pregunta: "¿Cuántas bolas totales hay (N)?",
+                            respuesta: "10"
+                        },
+                        {
+                            pregunta: "¿Cuántas bolas rojas hay (K)?",
+                            respuesta: "4"
+                        },
+                        {
+                            pregunta: "¿Cuántas bolas se extraen (n)?",
+                            respuesta: "3"
+                        },
+                        {
+                            pregunta: "¿Cuántas rojas queremos extraer (k)?",
+                            respuesta: "2"
+                        },
+                        {
+                            pregunta: "Calcula C(K, k) = C(4, 2) = 6",
+                            respuesta: "6"
+                        },
+                        {
+                            pregunta: "Calcula C(N-K, n-k) = C(6, 1) = 6",
+                            respuesta: "6"
+                        },
+                        {
+                            pregunta: "Calcula C(N, n) = C(10, 3) = 120",
+                            respuesta: "120"
+                        },
+                        {
+                            pregunta: "Calcula (C(K,k)*C(N-K,n-k))/C(N,n) = (6*6)/120",
+                            respuesta: "0.3"
+                        }
+                    ],
+                    resultado: "La probabilidad de sacar exactamente 2 bolas rojas es <b>0.3</b>."
+                }
+            },
+            "binomial_negativo": {
+                nombre: "Distribución Binomial Negativa",
+                explicacion: `
+                    <b>¿Qué es?</b><br>
+                    Modela la probabilidad de que ocurran <b>k-1 fracasos</b> antes de obtener el <b>r-ésimo éxito</b> en ensayos independientes con probabilidad de éxito p.<br>
+                    <ul>
+                        <li>Ensayos independientes.</li>
+                        <li>Cada ensayo tiene probabilidad de éxito p.</li>
+                        <li>Se fija el número de éxitos a obtener (r).</li>
+                    </ul>
+                `,
+                formula: `
+                    P(X = k) = C(k-1, r-1) · p<sup>r</sup> · (1-p)<sup>k-r</sup>
+                    <br>
+                    <small>
+                        Donde:<br>
+                        k = número total de ensayos<br>
+                        r = número de éxitos deseados<br>
+                        p = probabilidad de éxito<br>
+                    </small>
+                `,
+                ejercicio: {
+                    enunciado: `
+                        La probabilidad de acertar un tiro es de 0.4 (<b>p = 0.4</b>).<br>
+                        ¿Cuál es la probabilidad de necesitar 6 intentos para lograr 3 aciertos (<b>r = 3, k = 6</b>)?
+                    `,
+                    pasos: [
+                        {
+                            pregunta: "¿Cuál es la probabilidad de éxito (p)?",
+                            respuesta: "0.4"
+                        },
+                        {
+                            pregunta: "¿Cuántos éxitos se buscan (r)?",
+                            respuesta: "3"
+                        },
+                        {
+                            pregunta: "¿Cuántos intentos en total (k)?",
+                            respuesta: "6"
+                        },
+                        {
+                            pregunta: "Calcula C(k-1, r-1) = C(5, 2) = 10",
+                            respuesta: "10"
+                        },
+                        {
+                            pregunta: "Calcula p^r = 0.4^3",
+                            respuesta: "0.064"
+                        },
+                        {
+                            pregunta: "Calcula (1-p)^(k-r) = 0.6^3",
+                            respuesta: "0.216"
+                        },
+                        {
+                            pregunta: "Multiplica todo: 10 * 0.064 * 0.216",
+                            respuesta: "0.13824"
+                        }
+                    ],
+                    resultado: "La probabilidad de necesitar 6 intentos para 3 aciertos es <b>0.13824</b>."
+                }
+            }
+        };
+
+        // Utilidad para limpiar y cargar contenido
+        function mostrarDistribucion(dist) {
+            // Cambia el botón activo
+            document.querySelectorAll('.menu-btn').forEach(btn => btn.classList.remove('active'));
+            const index = ["binomial","poisson","geometrico","hipergeometrico","binomial_negativo"].indexOf(dist);
+            if (index !== -1) document.querySelectorAll('.menu-btn')[index].classList.add('active');
+
+            // Cargar el contenido
+            const data = distribuciones[dist];
+            let contenido = `
+                <h2>${data.nombre}</h2>
+                <div class="explicacion">${data.explicacion}</div>
+                <div class="formula"><b>Fórmula:</b><br>${data.formula}</div>
+                <div class="ejercicio">
+                    <b>Ejercicio paso a paso:</b><br>
+                    <div>${data.ejercicio.enunciado}</div>
+                    <form id="ejercicio-form">
+                        <ol class="pasos">
+                        ${data.ejercicio.pasos.map((paso,i) => `
+                            <li>${paso.pregunta}
+                                <input type="text" class="input-step" data-indice="${i}" autocomplete="off" />
+                                <button type="button" class="check-btn" onclick="verificarPaso('${dist}',${i})">Verificar</button>
+                                <span id="feedback-${i}"></span>
+                            </li>
+                        `).join('')}
+                        </ol>
+                        <button type="button" class="check-btn" onclick="mostrarResultado('${dist}')">Mostrar resultado final</button>
+                    </form>
+                    <div id="resultado-ejercicio"></div>
+                </div>
+            `;
+            document.getElementById('contenido').innerHTML = contenido;
+        }
+
+        // Verifica cada paso del ejercicio
+        function verificarPaso(dist, indice) {
+            const input = document.querySelector(`input[data-indice="${indice}"]`);
+            const valor = input.value.replace(",",".").trim();
+            const esperado = distribuciones[dist].ejercicio.pasos[indice].respuesta;
+            let correcto = false;
+
+            // Permitir pequeñas tolerancias para decimales
+            if (!isNaN(valor) && !isNaN(esperado)) {
+                correcto = Math.abs(parseFloat(valor) - parseFloat(esperado)) < 0.01;
+            } else {
+                correcto = valor == esperado;
+            }
+            document.getElementById(`feedback-${indice}`).innerHTML = correcto
+                ? `<span class="resultado">¡Correcto!</span>`
+                : `<span class="incorrecto">Intenta de nuevo</span>`;
+        }
+
+        // Muestra el resultado final del ejercicio
+        function mostrarResultado(dist) {
+            const resultado = distribuciones[dist].ejercicio.resultado;
+            document.getElementById('resultado-ejercicio').innerHTML = `<div class="resultado">${resultado}</div>`;
+        }
+
+        // Inicializa con la binomial
+        window.onload = function() {
+            mostrarDistribucion('binomial');
+        }
+    </script>
+</body>
+</html>
